@@ -17,21 +17,16 @@ class Preprocessor(object):
 		self.final_size = (200,200)
 		self.image_set = None
 
-	def process_images(self, destination_root):
+	def process_images(self, destination_root, categories):
 		if not os.path.exists(destination_root):
 			os.makedirs(destination_root)
-		catIds = self.coco.getCatIds(['Acinonyx jubatus'])
+		catIds = self.coco.getCatIds(categories)
 		for cat in catIds:
-			imgIds = self.coco.getImgIds(catIds=cat)
-			print(len(imgIds))
-			images_ref = self.coco.loadImgs(imgIds)
-			print(len(images_ref))
+			img_ids = self.coco.getImgIds(catIds=cat)
+			images_ref = self.coco.loadImgs(img_ids)
 			images = [io.imread(self.source_root + image_ref['file_name']) for image_ref in images_ref]
-			print(images_ref[0]['file_name'])
 			species_dir, _ = os.path.split(os.path.join(destination_root,images_ref[0]['file_name']))
-			print(species_dir)
 			supercat_dir, _ = os.path.split(species_dir)
-			print(supercat_dir)
 			if not os.path.exists(os.path.join(destination_root, supercat_dir)):
 				os.makedirs(supercat_dir)
 			if not os.path.exists(species_dir):

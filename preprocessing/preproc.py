@@ -12,6 +12,6 @@ train_annotations = '{}train2017.json'.format(annotations_dir)
 val_annotations = '{}val2017.json'.format(annotations_dir)
 
 preprocessor_train = Preprocessor(data_dir, train_annotations)
-preprocessor_train.process_images('../data2/')
+preprocessor_train.process_images('../data2/', ['Acinonyx jubatus'])
 preprocessor_val = Preprocessor(data_dir, val_annotations)
-preprocessor_val.process_images('../data2/')
+preprocessor_val.process_images('../data2/', ['Acinonyx jubatus'])
