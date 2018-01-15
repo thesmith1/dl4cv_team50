@@ -1,3 +1,8 @@
+'''
+script used to produce a reduced version of the complete dataset on JSON
+'''
+
+
 import json
 
 train_file = json.load(open('../annotations/train2017.json'))
