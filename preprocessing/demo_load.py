@@ -1,9 +1,8 @@
-'''
+"""
 Demo script for loading the dataset in batches
-'''
+"""
 
 from inaturalist_dataset import INaturalistDataset
-import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -21,8 +20,8 @@ all_ids = inaturalist.ids
 # images, targets = inaturalist.get_images(all_ids)
 
 batch_size = 10
-train_loader = torch.utils.data.DataLoader(inaturalist,
-	batch_size=batch_size, shuffle=True)
+train_loader = torch.utils.data.DataLoader(inaturalist, batch_size=batch_size, shuffle=True)
+
 
 class Net(nn.Module):
     def __init__(self):
@@ -42,15 +41,13 @@ class Net(nn.Module):
         x = self.fc2(x)
         return F.log_softmax(x)
 
+
 model = Net()
-
 lr = 1e-3
-
 optimizer = optim.SGD(model.parameters(), lr=lr)
-
 epochs = 2
-
 log_interval = 10
+
 
 def train(epoch):
     model.train()
@@ -58,7 +55,6 @@ def train(epoch):
         data, target = Variable(data), Variable(target)
         optimizer.zero_grad()
         output = model(data)
-        print(data.shape, output.shape, target.shape)
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
@@ -67,21 +63,22 @@ def train(epoch):
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), loss.data[0]))
 
-def test():
-    model.eval()
-    test_loss = 0
-    correct = 0
-    for data, target in test_loader:
-        data, target = Variable(data, volatile=True), Variable(target)
-        output = model(data)
-        test_loss += F.nll_loss(output, target, size_average=False).data[0] # sum up batch loss
-        pred = output.data.max(1, keepdim=True)[1] # get the index of the max log-probability
-        correct += pred.eq(target.data.view_as(pred)).cpu().sum()
 
-    test_loss /= len(test_loader.dataset)
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-        test_loss, correct, len(test_loader.dataset),
-        100. * correct / len(test_loader.dataset)))
+# def test():
+#     model.eval()
+#     test_loss = 0
+#     correct = 0
+#     for data, target in test_loader:
+#         data, target = Variable(data, volatile=True), Variable(target)
+#         output = model(data)
+#         test_loss += F.nll_loss(output, target, size_average=False).data[0]  # sum up batch loss
+#         pred = output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
+#         correct += pred.eq(target.data.view_as(pred)).cpu().sum()
+#
+#     test_loss /= len(test_loader.dataset)
+#     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+#         test_loss, correct, len(test_loader.dataset),
+#         100. * correct / len(test_loader.dataset)))
 
 
 for epoch in range(1, epochs + 1):
