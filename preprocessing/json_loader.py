@@ -20,7 +20,7 @@ train_set = json.load(open('../annotations/train2017.json'))
 val_set = json.load(open('../annotations/val2017.json'))
 print('loaded files...', end='')
 
-# obtain labels of the required categories
+# obtain all annotations
 train_annotations = train_set['annotations']
 val_annotations = val_set['annotations']
 
