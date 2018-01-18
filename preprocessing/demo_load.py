@@ -16,7 +16,7 @@ train_annotations = '{}train2017_min.json'.format(annotations_dir)
 val_annotations = '{}val2017.json'.format(annotations_dir)
 
 inaturalist = INaturalistDataset(data_dir, train_annotations, transform=transforms.ToTensor())
-all_ids = inaturalist.ids
+all_ids = inaturalist.all_ids
 # images, targets = inaturalist.get_images(all_ids)
 
 batch_size = 10

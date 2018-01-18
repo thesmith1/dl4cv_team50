@@ -22,13 +22,13 @@ class INaturalistDataset(data.Dataset):
         from pycocotools.coco import COCO
         self.root = os.path.expanduser(root)
         self.coco = COCO(annotations)
-        self.ids = list(self.coco.imgs.keys())
         self.transform = transform
+        self.all_ids = list(self.coco.imgs.keys())
 
     def __getitem__(self, index):
         # print('Loading image', index)
         coco = self.coco
-        img_id = self.ids[index]
+        img_id = self.all_ids[index]
         img_ref = self.coco.loadImgs(img_id)
         try:
             # imgs = [io.imread(self.root + img_ref[i]['file_name']) for i, img in enumerate(img_ref)]
@@ -56,7 +56,7 @@ class INaturalistDataset(data.Dataset):
         return self[indexes]
 
     def __len__(self):
-        return len(self.ids)
+        return len(self.all_ids)
 
     def get_size(self):
         return self.__len__()
