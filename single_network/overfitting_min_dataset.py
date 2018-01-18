@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 """
-Overfitting small dataset (see annotations/*_min.json)
+script for overfitting small dataset (see annotations/*_min.json)
 """
 
 from preprocessing.inaturalist_dataset import INaturalistDataset
@@ -10,6 +10,8 @@ import torch.utils.data
 import torch.optim as optim
 from torchvision import models, transforms
 from torch.autograd import Variable
+
+cuda = torch.cuda.is_available()
 
 # parameters
 batch_size = 10
@@ -45,6 +47,10 @@ model.fc = nn.Linear(fc_in_features, output_categories)
 # create optimizer
 optimizer = optimizer(model.fc.parameters(), lr=lr)
 
+# move model to GPU
+if cuda:
+    model = model.cuda()
+
 
 # single epoch of training method
 def train(epoch):
@@ -57,6 +63,8 @@ def train(epoch):
 
         # initialization
         data, target = Variable(data), Variable(target)
+        if cuda:
+            data, target = data.cuda(), target.cuda()
         optimizer.zero_grad()
 
         # forward pass
@@ -90,7 +98,9 @@ def evaluate(dataset_loader):
     # for each batch
     for data, target in dataset_loader:
 
-        # convert to Variable
+        # initialization
+        if cuda:
+            data, target = data.cuda(), target.cuda()
         data, target = Variable(data, volatile=True), Variable(target)
 
         # forward pass
