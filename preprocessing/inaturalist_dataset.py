@@ -2,7 +2,7 @@ import torch.utils.data as data
 import os
 import os.path
 import skimage.io as io
-import preprocessor
+from preprocessing import preprocessor
 
 
 class INaturalistDataset(data.Dataset):
