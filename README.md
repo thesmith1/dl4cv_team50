@@ -22,4 +22,6 @@ python setup.py build_ext install
 ```
 ## Logs
 ### 20/01/2018: Giorgio
-A new script named modular_network.py contains the code for a ResNet50 which can be overfitted on the small dataset. Unfortunately, due to a severe problem with imports on python using relative paths, the only solution I found so far of making it work is to place it in the root directory, so now I'm using the modular_network folder as storage of the best models. Next step: adapt that script to accept arguments and implement the modularity with multiple networks.
+A new script named modular_network.py contains the code for a ResNet50 which can be overfitted on the small dataset. Unfortunately, due to a severe problem with imports on python using relative paths, the only solution I found so far of making it work is to place it in the root directory, so now I'm using the modular_network folder as storage of the best models.
+The script now accepts arguments in input (only hyperparameters and settings), using argparser.
+Next step: adapt that script to accept as arguments choices among optimizers and loss functions and implement the modularity with multiple networks.
