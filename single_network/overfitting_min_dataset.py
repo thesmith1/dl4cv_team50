@@ -26,7 +26,7 @@ optimizer = optim.Adam
 
 # set directories
 data_dir = './data2/'
-annotations_dir = './annotations/'
+annotations_dir = './annotations/single_network/'
 train_annotations = '{}train2017_min.json'.format(annotations_dir)
 val_annotations = '{}val2017_min.json'.format(annotations_dir)
 
@@ -61,9 +61,10 @@ def train(epoch):
     model.train()
 
     # for each batch
-    for batch_idx, (data, target) in enumerate(train_loader):
+    for batch_idx, (data, targets) in enumerate(train_loader):
 
         # initialization
+        _, target = targets
         data, target = Variable(data), Variable(target)
         if cuda:
             data, target = data.cuda(), target.cuda()
@@ -98,9 +99,11 @@ def evaluate(dataset_loader):
     correct = 0
 
     # for each batch
-    for data, target in dataset_loader:
+    for data, targets in dataset_loader:
 
         # initialization
+        _, target = targets
+
         if cuda:
             data, target = data.cuda(), target.cuda()
         data, target = Variable(data, volatile=True), Variable(target)

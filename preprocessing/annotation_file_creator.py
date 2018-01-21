@@ -6,7 +6,6 @@ import json
 
 SPECIFIC_SPECIES = 0
 SPECIFIC_SUPERCATEGORY = 1
-SUPERCATEGORIES_AS_LABELS = 2
 
 species_to_be_kept = []
 supercategory_to_be_kept = None
@@ -36,11 +35,6 @@ elif mode == SPECIFIC_SUPERCATEGORY:
     supercategory_to_be_kept = 'Mammalia'
 
     dst_annotations_train = './annotations/modular_network/{}/train2017_min.json'.format(supercategory_to_be_kept)
-    dst_annotations_val = './annotations/modular_network/{}/val2017_min.json'.format(supercategory_to_be_kept)
-elif mode == SUPERCATEGORIES_AS_LABELS:
-    pass  # TODO
-
-    dst_annotations_train = './annotations/modular_network/supercategory_classification/train2017_min.json'.format(supercategory_to_be_kept)
     dst_annotations_val = './annotations/modular_network/{}/val2017_min.json'.format(supercategory_to_be_kept)
 else:
     exit(-1)

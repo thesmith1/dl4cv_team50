@@ -55,8 +55,8 @@ log_interval = 10
 
 def train(epoch):
     model.train()
-    for batch_idx, (data, target) in enumerate(train_loader):
-        data, target = Variable(data), Variable(target)
+    for batch_idx, (data, (target1, target2)) in enumerate(train_loader):
+        data, target = Variable(data), Variable(target2)
         optimizer.zero_grad()
         output = model(data)
         loss = F.nll_loss(output, target)

@@ -4,9 +4,15 @@ import os.path
 import skimage.io as io
 from preprocessing import preprocessor
 
-supercategory_target = {'Actinopterygii': 0, 'Amphibia': 1, 'Animalia': 2, 'Arachnida': 3, 'Aves':4,
-                    'Chromista': 5, 'Fungi': 6, 'Insecta': 7, 'Mammalia': 8, 'Mollusca': 9,
-                    'Plantae': 10, 'Protozoa': 11, 'Reptilia': 12}
+
+class LabelRemapper(object):
+    def __init__(self, all_labels):
+        self.single_classes = sorted(list(set(all_labels)))
+        self.class_count = len(self.single_classes)
+        self.class_map = {single_class: self.single_classes.index(single_class) for single_class in self.single_classes}
+
+    def __getitem__(self, item):
+        return self.class_map[item]
 
 
 class INaturalistDataset(data.Dataset):
@@ -22,13 +28,24 @@ class INaturalistDataset(data.Dataset):
         get_size: returns the size of the total dataset
     """
 
-    def __init__(self, root, annotations, transform, classify_supercategories=False):
+    def __init__(self, root, annotations, transform):
         from pycocotools.coco import COCO
         self.root = os.path.expanduser(root)
         self.coco = COCO(annotations)
         self.transform = transform
         self.all_ids = list(self.coco.imgs.keys())
-        self.classify_supercategories = classify_supercategories
+
+        # produce supercategory remapper
+        all_categories = self.coco.cats
+        all_supercategories = {cat['supercategory'] for cat in all_categories.values()}
+        self.supercat_remapper = LabelRemapper(all_supercategories)
+
+        # produce single category remappers, stored in a dict
+        self.category_remappers = dict()
+        for supercategory in all_supercategories:
+            inter_category_ids = {cat['id'] for cat in all_categories.values() if cat['supercategory'] == supercategory}
+            category_remapper = LabelRemapper(inter_category_ids)
+            self.category_remappers[supercategory] = category_remapper
 
     def __getitem__(self, index):
         # print('Loading image', index)
@@ -38,7 +55,7 @@ class INaturalistDataset(data.Dataset):
         img_id = self.all_ids[index]
 
         # find image given image id
-        img_ref = self.coco.loadImgs(img_id)
+        img_ref = coco.loadImgs(img_id)
 
         try:
             # imgs = [io.imread(self.root + img_ref[i]['file_name']) for i, img in enumerate(img_ref)]
@@ -53,20 +70,18 @@ class INaturalistDataset(data.Dataset):
             ann_id = coco.getAnnIds(imgIds=img_id)
             ann = coco.loadAnns(ann_id)
 
-            # depending on target mode, produce target (either supercategory or category)
-            if self.classify_supercategories:
-                category_id = ann[0]['category_id']
-                supercategory = coco.cats[category_id]['supercategory']
-                target = supercategory_target[supercategory]
-            else:
-                target = ann[0]['category_id']
+            category_id = ann[0]['category_id']
+            supercategory = coco.cats[category_id]['supercategory']
+            supercategory_target = self.supercat_remapper[supercategory]
+            category_target = self.category_remappers[supercategory][category_id]
 
         except FileNotFoundError as e:
             print(e)
             img = None
-            target = None
+            supercategory_target = None
+            category_target = None
 
-        return img, target
+        return img, (supercategory_target, category_target)
 
     def get_image(self, index):
         return self[index]
