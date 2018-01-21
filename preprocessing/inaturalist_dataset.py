@@ -8,6 +8,7 @@ supercategory_target = {'Actinopterygii': 0, 'Amphibia': 1, 'Animalia': 2, 'Arac
                     'Chromista': 5, 'Fungi': 6, 'Insecta': 7, 'Mammalia': 8, 'Mollusca': 9,
                     'Plantae': 10, 'Protozoa': 11, 'Reptilia': 12}
 
+
 class INaturalistDataset(data.Dataset):
 
     """

@@ -11,7 +11,7 @@ sys.path.append(lib_path)
 from preprocessing.preprocessor import Preprocessor
 
 data_dir = './data/'
-annotations_dir = './annotations/single_network/'
+annotations_dir = './annotations/modular_network/Animalia/'
 dest_dir = './data2/'
 
 train_annotations = '{}train2017_min.json'.format(annotations_dir)

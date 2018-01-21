@@ -25,9 +25,9 @@ mode = SPECIFIC_SPECIES
 # option for specific modes
 if mode == SPECIFIC_SPECIES:
     # Insert the subset of species to be selected below:
-    species_to_be_kept = ['Actinemys marmorata', 'Hypsiglena jani', 'Zootoca vivipara']
+    species_to_be_kept = ['Acinonyx jubatus', 'Lycaon pictus', 'Zalophus californianus']
 
-    supercategory = 'Reptilia'
+    supercategory = 'Mammalia'
     dst_annotations_train = './annotations/modular_network/{}/train2017_min.json'.format(supercategory)
     dst_annotations_val = './annotations/modular_network/{}/val2017_min.json'.format(supercategory)
 
