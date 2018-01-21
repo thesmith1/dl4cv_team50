@@ -4,6 +4,9 @@ import os.path
 import skimage.io as io
 from preprocessing import preprocessor
 
+supercategory_target = {'Actinopterygii': 0, 'Amphibia': 1, 'Animalia': 2, 'Arachnida': 3, 'Aves':4,
+                    'Chromista': 5, 'Fungi': 6, 'Insecta': 7, 'Mammalia': 8, 'Mollusca': 9,
+                    'Plantae': 10, 'Protozoa': 11, 'Reptilia': 12}
 
 class INaturalistDataset(data.Dataset):
 
@@ -18,30 +21,45 @@ class INaturalistDataset(data.Dataset):
         get_size: returns the size of the total dataset
     """
 
-    def __init__(self, root, annotations, transform):
+    def __init__(self, root, annotations, transform, classify_supercategories=False):
         from pycocotools.coco import COCO
         self.root = os.path.expanduser(root)
         self.coco = COCO(annotations)
         self.transform = transform
         self.all_ids = list(self.coco.imgs.keys())
+        self.classify_supercategories = classify_supercategories
 
     def __getitem__(self, index):
         # print('Loading image', index)
+
+        # find image id given index
         coco = self.coco
         img_id = self.all_ids[index]
+
+        # find image given image id
         img_ref = self.coco.loadImgs(img_id)
+
         try:
             # imgs = [io.imread(self.root + img_ref[i]['file_name']) for i, img in enumerate(img_ref)]
             img = io.imread(self.root + img_ref[0]['file_name'])
             # imgs = [preprocessor.normalize(img) for img in imgs]
-            # print(type(imgs[0]))
+
             img = preprocessor.normalize(img)
             if self.transform:
                 img = self.transform(img)
 
+            # find annotation of the image
             ann_id = coco.getAnnIds(imgIds=img_id)
             ann = coco.loadAnns(ann_id)
-            target = ann[0]['category_id']
+
+            # depending on target mode, produce target (either supercategory or category)
+            if self.classify_supercategories:
+                category_id = ann[0]['category_id']
+                supercategory = coco.cats[category_id]['supercategory']
+                target = supercategory_target[supercategory]
+            else:
+                target = ann[0]['category_id']
+
         except FileNotFoundError as e:
             print(e)
             img = None

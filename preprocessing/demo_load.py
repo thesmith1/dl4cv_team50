@@ -15,7 +15,7 @@ from torchvision import transforms
 from torch.autograd import Variable
 
 data_dir = './data2/'
-annotations_dir = './annotations/'
+annotations_dir = './annotations/single_network/'
 train_annotations = '{}train2017_min.json'.format(annotations_dir)
 val_annotations = '{}val2017_min.json'.format(annotations_dir)
 
