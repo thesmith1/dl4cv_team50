@@ -31,7 +31,7 @@ class Preprocessor(object):
             supercat_dir, _ = os.path.split(species_dir)
 
             # create super category directory, if necessary
-            if not os.path.exists(os.path.join(destination_root, supercat_dir)):
+            if not os.path.exists(supercat_dir):
                 os.makedirs(supercat_dir)
 
             # create category directory, if necessary

@@ -4,15 +4,37 @@ script used to produce a reduced version (some species only) of the complete dat
 
 import json
 
-# Insert the subset of species to be selected below:
-species_to_be_kept = ['Acinonyx jubatus', 'Lycaon pictus', 'Zalophus californianus']
+SPECIFIC_SPECIES = 0
+SPECIFIC_SUPERCATEGORY = 1
+SUPERCATEGORIES_AS_LABELS = 2
 
-# insert paths here
-src_annotations_train = '../annotations/train2017.json'
-src_annotations_val = '../annotations/val2017.json'
+# inputs
 
-dst_annotations_train = '../annotations/train2017_min.json'
-dst_annotations_val = '../annotations/val2017_min.json'
+# input paths
+
+src_annotations_train = './annotations/single_network/train2017.json'
+src_annotations_val = './annotations/single_network/val2017.json'
+
+mode = SPECIFIC_SPECIES
+
+if mode == SPECIFIC_SPECIES:
+    # Insert the subset of species to be selected below:
+    species_to_be_kept = ['Actinemys marmorata', 'Hypsiglena jani', 'Zootoca vivipara']
+
+    supercategory = 'Reptilia'
+    dst_annotations_train = './annotations/modular_network/{}/train2017_min.json'.format(supercategory)
+    dst_annotations_val = './annotations/modular_network/{}/val2017_min.json'.format(supercategory)
+elif mode == SPECIFIC_SUPERCATEGORY:
+    # or ALL in specific supercategory
+    supercategory_to_be_kept = 'Mammalia'
+
+    dst_annotations_train = './annotations/modular_network/{}/train2017_min.json'.format(supercategory_to_be_kept)
+    dst_annotations_val = './annotations/modular_network/{}/val2017_min.json'.format(supercategory_to_be_kept)
+elif mode == SUPERCATEGORIES_AS_LABELS:
+    pass #TODO
+else:
+    species_to_be_kept = None
+    exit(-1)
 
 
 def new_annotation(old_annotation):
@@ -30,10 +52,18 @@ def new_category(old_category):
     result['id'] = new_id
     return result
 
+
+def species_of_supecategory(dataset, supecategory):
+    filt_species = [category for category in dataset['categories'] if category['supecategory'] == supecategory]
+    return [species['name'] for species in filt_species]
+
 # load data sets
 train_set = json.load(open(src_annotations_train))
 val_set = json.load(open(src_annotations_val))
 print('loaded files...', end='')
+
+if mode == SPECIFIC_SUPERCATEGORY:
+    species_to_be_kept = species_of_supecategory(train_set, supercategory_to_be_kept)
 
 # obtain all annotations
 train_annotations = train_set['annotations']
