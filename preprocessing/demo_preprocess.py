@@ -4,7 +4,11 @@ Initialize the object with the required parameters, then
 call the process_images() method
 """
 
-from preprocessor import Preprocessor
+import sys, os
+lib_path = os.path.abspath(os.path.join(__file__, '../..'))
+sys.path.append(lib_path)
+
+from preprocessing.preprocessor import Preprocessor
 
 data_dir = '../data/'
 annotations_dir = '../annotations/'

@@ -1,8 +1,10 @@
-#!/usr/bin/python3
-
+#!/usr/bin/env python3
 """
 script for overfitting small dataset (see annotations/*_min.json)
 """
+import sys, os
+lib_path = os.path.abspath(os.path.join(__file__, '../..'))
+sys.path.append(lib_path)
 
 from preprocessing.inaturalist_dataset import INaturalistDataset
 import torch.nn as nn
@@ -38,7 +40,7 @@ train_loader = torch.utils.data.DataLoader(inaturalist_train, batch_size=batch_s
 val_loader = torch.utils.data.DataLoader(inaturalist_val, batch_size=batch_size, shuffle=True)
 
 # get pre-trained model, change FC layer
-model = models.resnet18(pretrained=True)
+model = models.resnet50(pretrained=True)
 for param in model.parameters():
     param.requires_grad = False
 fc_in_features = model.fc.in_features
