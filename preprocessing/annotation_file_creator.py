@@ -40,22 +40,6 @@ else:
     exit(-1)
 
 
-def new_annotation(old_annotation):
-    old_target = old_annotation['category_id']
-    new_target = subset_categories_indexes.index(old_target)
-    result = dict(old_annotation)
-    result['category_id'] = new_target
-    return result
-
-
-def new_category(old_category):
-    old_id = old_category['id']
-    new_id = subset_categories_indexes.index(old_id)
-    result = dict(old_category)
-    result['id'] = new_id
-    return result
-
-
 def species_of_supecategory(dataset, supecategory):
     filt_species = [category for category in dataset['categories'] if category['supecategory'] == supecategory]
     return [species['name'] for species in filt_species]
@@ -75,7 +59,7 @@ if __name__ == '__main__':
     train_annotations = train_set['annotations']
     val_annotations = val_set['annotations']
 
-    # transform species names to indexes
+    # transform species to be kept to indexes
     subset_categories_indexes = [cat['id'] for cat in train_set['categories'] if cat['name'] in species_to_be_kept]
 
     # obtain image ids for the images the required categories
@@ -87,11 +71,10 @@ if __name__ == '__main__':
     filtered_imgs_train = [img for img in train_set['images'] if img['id'] in filtered_image_ids_train]
     filtered_imgs_val = [img for img in val_set['images'] if img['id'] in filtered_image_ids_val]
 
-    # keep only annotations of the required categories (i.e. id in filtered image ids),
-    # apply change of annotations to be in [0, K-1]
-    new_ann_train = [new_annotation(ann) for ann in train_set['annotations'] if
+    # keep only annotations of the required categories (i.e. id in filtered image ids)
+    new_ann_train = [ann for ann in train_set['annotations'] if
                      ann['category_id'] in subset_categories_indexes]
-    new_ann_val = [new_annotation(ann) for ann in val_set['annotations'] if ann['category_id'] in subset_categories_indexes]
+    new_ann_val = [ann for ann in val_set['annotations'] if ann['category_id'] in subset_categories_indexes]
 
     # assign new images
     train_set['images'] = filtered_imgs_train
@@ -102,8 +85,8 @@ if __name__ == '__main__':
     # assign new categories
     present_cat_ids_train = {ann['category_id'] for ann in train_set['annotations']}
     present_cat_ids_val = {ann['category_id'] for ann in val_set['annotations']}
-    new_cat_train = [new_category(cat) for cat in train_set['categories'] if cat['id'] in subset_categories_indexes]
-    new_cat_val = [new_category(cat) for cat in val_set['categories'] if cat['id'] in subset_categories_indexes]
+    new_cat_train = [cat for cat in train_set['categories'] if cat['id'] in subset_categories_indexes]
+    new_cat_val = [cat for cat in val_set['categories'] if cat['id'] in subset_categories_indexes]
 
     train_set['categories'] = new_cat_train
     val_set['categories'] = new_cat_val
@@ -117,4 +100,3 @@ if __name__ == '__main__':
         json.dump(val_set, val_file)
 
     print("saved new files.")
-
