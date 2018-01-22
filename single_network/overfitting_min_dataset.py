@@ -25,7 +25,7 @@ output_categories = 3
 optimizer = optim.Adam
 
 # set directories
-data_dir = './data2/'
+data_dir = './data_min2/'
 annotations_dir = './annotations/single_network/'
 train_annotations = '{}train2017_min.json'.format(annotations_dir)
 val_annotations = '{}val2017_min.json'.format(annotations_dir)

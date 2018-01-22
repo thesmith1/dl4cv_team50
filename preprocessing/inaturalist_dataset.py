@@ -43,8 +43,8 @@ class INaturalistDataset(data.Dataset):
         # produce single category remappers, stored in a dict
         self.category_remappers = dict()
         for supercategory in all_supercategories:
-            inter_category_ids = {cat['id'] for cat in all_categories.values() if cat['supercategory'] == supercategory}
-            category_remapper = LabelRemapper(inter_category_ids)
+            intra_category_ids = {cat['id'] for cat in all_categories.values() if cat['supercategory'] == supercategory}
+            category_remapper = LabelRemapper(intra_category_ids)
             self.category_remappers[supercategory] = category_remapper
 
     def __getitem__(self, index):
