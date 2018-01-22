@@ -33,4 +33,10 @@ sudo apt-get install scikit-image
 A new script named modular_network.py contains the code for a ResNet50 which can be overfitted on the small dataset.
 **Important**: all the scripts following our relative import paths convention must be run from the root directory of the repo.
 The script now accepts arguments in input (only hyperparameters and settings), using argparser.
+
 Next step: adapt that script to accept as arguments choices among optimizers and loss functions and implement the modularity with multiple networks.
+
+### 21/01/2018: Giorgio
+The class ModularNetwork now supports different loss functions and optimizers and implements the methods train() and test(): we are ready for training.
+
+Next step: code for saving results of training and test.
