@@ -20,6 +20,14 @@ Download and extract from https://github.com/cocodataset/cocoapi, enter director
 ```sh
 python setup.py build_ext install
 ```
+### Other requirements
+
+Assumed your virtual environment has all the packages listed in the file requirements.txt installed, you may still need some additional installations to make the preprocessing work:
+```sh
+sudo apt-get install python3-tk
+sudo apt-get install scikit-image
+```
+
 ## Logs
 ### 20/01/2018: Giorgio
 A new script named modular_network.py contains the code for a ResNet50 which can be overfitted on the small dataset.
