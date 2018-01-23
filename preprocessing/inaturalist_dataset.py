@@ -2,6 +2,7 @@ import torch.utils.data as data
 import os
 import os.path
 import skimage.io as io
+from PIL import Image
 from pycocotools.coco import COCO
 from preprocessing import preprocessor
 
@@ -68,7 +69,14 @@ class INaturalistDataset(data.Dataset):
             img = io.imread(self.root + img_ref[0]['file_name'])
             # imgs = [preprocessor.normalize(img) for img in imgs]
 
-            img = preprocessor.normalize(img)
+            # img = preprocessor.normalize(img)
+            img = Image.fromarray(img)
+
+            # correct grayscale images
+            if img.mode != "RGB":
+                img = img.convert("RGB")
+                print("\n\n\nImage converted! \n\n\n")
+
             if self.transform:
                 img = self.transform(img)
 
@@ -91,6 +99,7 @@ class INaturalistDataset(data.Dataset):
             supercategory_target = None
             category_target = None
 
+        # print(img.size())
         return img, (supercategory_target, category_target)
 
     def get_image(self, index):

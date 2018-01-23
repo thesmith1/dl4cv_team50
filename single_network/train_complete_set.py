@@ -14,26 +14,28 @@ import torch.utils.data
 import torch.optim as optim
 from torchvision import models, transforms
 from torch.autograd import Variable
+import copy
 
 cuda = torch.cuda.is_available()
 
 # parameters
-batch_size = 10
+batch_size = 800
 lr = 1e-3
-epochs = 10
-log_interval = 10
+epochs = 1
+log_interval = 1
 loss = nn.CrossEntropyLoss()
 output_categories = 5089
 optimizer = optim.Adam
 
 # set directories
-data_dir = './data_preprocessed/'
+data_dir = './data/'
 annotations_dir = './annotations/single_network/'
 train_annotations = '{}train2017.json'.format(annotations_dir)
 val_annotations = '{}val2017.json'.format(annotations_dir)
 
 # create data sets
-applied_transformation = transforms.Compose([transforms.ToTensor()])
+applied_transformation = transforms.Compose([transforms.Resize((224, 224)), transforms.ToTensor()])
+# applied_transformation = transforms.Compose([transforms.ToTensor()])
 inaturalist_train = INaturalistDataset(data_dir, train_annotations, transform=applied_transformation,
                                        modular_network_remap=False)
 inaturalist_val = INaturalistDataset(data_dir, val_annotations, transform=applied_transformation,
@@ -69,6 +71,7 @@ def train(epoch):
 
         # keep only species target
         _, target = targets
+        print(data.shape)
         data, (target) = Variable(data), Variable(target)
         if cuda:
             data, target = data.cuda(), target.cuda()
@@ -143,3 +146,6 @@ if __name__ == '__main__':
     # evaluation on validation set
     print("Evaluating model on validation set...")
     evaluate(val_loader)
+
+    model_dict = copy.deep_copy(model.state_dict())
+    torch.save(model_dict, "model_single_epoch.pth")
