@@ -66,11 +66,6 @@ class INaturalistDataset(data.Dataset):
             img = Image.open(self.root + img_ref[0]['file_name'])
             # imgs = [preprocessor.normalize(img) for img in imgs]
 
-            # correct grayscale images
-            if img.mode != "RGB":
-                img.convert("RGB")
-                print("\n\n\nImage converted! \n\n\n")
-
             if self.transform:
                 img = self.transform(img)
 

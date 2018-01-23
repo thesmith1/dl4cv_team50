@@ -1,6 +1,5 @@
 from pycocotools.coco import COCO
-import skimage.io as io
-from skimage.transform import resize
+from PIL import Image
 import os
 
 '''
@@ -26,7 +25,7 @@ class Preprocessor(object):
         for cat in catIds:
             img_ids = self.coco.getImgIds(catIds=cat)
             images_ref = self.coco.loadImgs(img_ids)
-            images = [io.imread(self.source_root + image_ref['file_name']) for image_ref in images_ref]
+            images = [Image.open(self.source_root + image_ref['file_name']) for image_ref in images_ref]
             species_dir, _ = os.path.split(os.path.join(destination_root, images_ref[0]['file_name']))
             supercat_dir, _ = os.path.split(species_dir)
 
@@ -40,10 +39,13 @@ class Preprocessor(object):
 
             processed_images = [self.process_single_image(img) for img in images]
             for img, img_ref in zip(processed_images, images_ref):
-                io.imsave(destination_root + img_ref['file_name'], img)
+                img.save(destination_root + img_ref['file_name'])
 
     def process_single_image(self, image):
-        return resize(image, self.final_size)
+        if image.mode != "RGB":
+            image.convert("RGB")
+            # print("Image converted!")
+        return image.resize(self.final_size)
 
     def set_final_size(self, final_size):
         self.final_size = final_size
