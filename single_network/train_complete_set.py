@@ -15,7 +15,7 @@ import torch.optim as optim
 from torchvision import models, transforms
 from torch.autograd import Variable
 
-cuda = False # torch.cuda.is_available()
+cuda = torch.cuda.is_available()
 
 # parameters
 batch_size = 10
@@ -23,7 +23,7 @@ lr = 1e-3
 epochs = 10
 log_interval = 10
 loss = nn.CrossEntropyLoss()
-output_categories = 3
+output_categories = 5089
 optimizer = optim.Adam
 
 # set directories
@@ -67,7 +67,7 @@ def train(epoch):
     # for each batch
     for batch_idx, (data, targets) in enumerate(train_loader):
 
-        # initialization
+        # keep only species target
         _, target = targets
         data, (target) = Variable(data), Variable(target)
         if cuda:
@@ -105,7 +105,7 @@ def evaluate(dataset_loader):
     # for each batch
     for data, targets in dataset_loader:
 
-        # initialization
+        # keep only species target
         _, target = targets
 
         if cuda:
