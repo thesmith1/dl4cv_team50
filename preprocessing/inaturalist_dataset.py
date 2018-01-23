@@ -2,6 +2,7 @@ import torch.utils.data as data
 import os
 import os.path
 import skimage.io as io
+from pycocotools.coco import COCO
 from preprocessing import preprocessor
 
 
@@ -16,7 +17,6 @@ class LabelRemapper(object):
 
 
 class INaturalistDataset(data.Dataset):
-
     """
     The iNaturalist dataset object class
     Args:
@@ -29,28 +29,29 @@ class INaturalistDataset(data.Dataset):
     """
 
     def __init__(self, root, annotations, transform, modular_network_remap=True):
-        from pycocotools.coco import COCO
+
         self.root = os.path.expanduser(root)
         self.coco = COCO(annotations)
         self.transform = transform
         self.all_ids = list(self.coco.imgs.keys())
-	self.modular_network_remap = modular_network_remap
+        self.modular_network_remap = modular_network_remap
 
         # produce supercategory remapper
         all_categories = self.coco.cats
         all_supercategories = {cat['supercategory'] for cat in all_categories.values()}
         self.supercat_remapper = LabelRemapper(all_supercategories)
 
-	if modular_network_remap:
-        	# produce single category remappers, stored in a dict
-        	self.category_remappers = dict()
-        	for supercategory in all_supercategories:
-            		intra_category_ids = {cat['id'] for cat in all_categories.values() if cat['supercategory'] == supercategory}
-            		category_remapper = LabelRemapper(intra_category_ids)
-            	self.category_remappers[supercategory] = category_remapper
-	else:
-		all_category_ids = {cat['id'] for cat in all_categories.values()} 
-		self.category_remapper = LabelRemapper(all_category_ids)
+        if modular_network_remap:
+            # produce single category remappers, stored in a dict
+            self.category_remappers = dict()
+            for supercategory in all_supercategories:
+                intra_category_ids = {cat['id'] for cat in all_categories.values() if
+                                      cat['supercategory'] == supercategory}
+                single_category_remapper = LabelRemapper(intra_category_ids)
+                self.category_remappers[supercategory] = single_category_remapper
+        else:
+            all_category_ids = {cat['id'] for cat in all_categories.values()}
+            self.category_remapper = LabelRemapper(all_category_ids)
 
     def __getitem__(self, index):
         # print('Loading image', index)
@@ -78,10 +79,12 @@ class INaturalistDataset(data.Dataset):
             category_id = ann[0]['category_id']
             supercategory = coco.cats[category_id]['supercategory']
             supercategory_target = self.supercat_remapper[supercategory]
-	    if self.modular_network_remap:
-            	category_target = self.category_remappers[supercategory][category_id]
-	    else:
-		category_target = self.category_remapper[category_id]
+
+            if self.modular_network_remap:
+                category_target = self.category_remappers[supercategory][category_id]
+            else:
+                category_target = self.category_remapper[category_id]
+
         except FileNotFoundError as e:
             print(e)
             img = None

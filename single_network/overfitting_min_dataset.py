@@ -34,8 +34,10 @@ val_annotations = '{}val2017.json'.format(annotations_dir)
 
 # create data sets
 applied_transformation = transforms.Compose([transforms.ToTensor()])
-inaturalist_train = INaturalistDataset(data_dir, train_annotations, transform=applied_transformation)
-inaturalist_val = INaturalistDataset(data_dir, val_annotations, transform=applied_transformation)
+inaturalist_train = INaturalistDataset(data_dir, train_annotations, transform=applied_transformation,
+                                       modular_network_remap=False)
+inaturalist_val = INaturalistDataset(data_dir, val_annotations, transform=applied_transformation,
+                                     modular_network_remap=False)
 
 # create loaders for the data sets
 train_loader = torch.utils.data.DataLoader(inaturalist_train, batch_size=batch_size, shuffle=True)
