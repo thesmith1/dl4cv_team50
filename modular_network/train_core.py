@@ -1,8 +1,8 @@
-'''
+"""
 This script launches the training and test on the core of the modular network,
 the one which classifies the supercategories;
 at the end of the process, it will save the results and the best model
-'''
+"""
 
 import os
 import sys
@@ -51,25 +51,22 @@ transf = transforms.ToTensor()
 print('Loading dataset for supercategories...')
 inaturalist_train = INaturalistDataset(data_dir, train_annotations, transform=transf)
 inaturalist_val = INaturalistDataset(data_dir, val_annotations, transform=transf)
-inaturalist_test = INaturalistDataset(data_dir, val_annotations, transform=transf)  # TODO: change
 print('Dataset for supercategories loaded.')
 
 train_loader = torch.utils.data.DataLoader(inaturalist_train, batch_size=batch_size, shuffle=True)
 val_loader = torch.utils.data.DataLoader(inaturalist_val, batch_size=batch_size, shuffle=True)
-test_loader = torch.utils.data.DataLoader(inaturalist_test, batch_size=batch_size, shuffle=True)
 
 for optimizer in optimizers:
     for loss in loss_functions:
         train_params = {'optimizer': optimizer, 'learning_rate': start_lr}
 
-        model = ModularNetwork({'train': inaturalist_train, 'val': inaturalist_val, 'test': inaturalist_test},
-                               {'train': train_loader, 'val': val_loader, 'test': test_loader}, train_params, loss,
+        model = ModularNetwork({'train': inaturalist_train, 'val': inaturalist_val, 'test': None},
+                               {'train': train_loader, 'val': val_loader, 'test': None}, train_params, loss,
                                cuda)
 
-        # best_model, hist_acc, hist_loss = model.train('categories_net', num_epochs)
-        best_model = model
-        hist_acc = {'train': [0, 1, 2, 3, 4], 'val': [0, 1, 2, 3, 4]}
-        hist_loss = {'train': [0, 1, 2, 3, 4], 'val': [0, 1, 2, 3, 4]}
+        best_model, hist_acc, hist_loss = model.train('categories_net', num_epochs)
+        hist_acc = {'train': [], 'val': []}
+        hist_loss = {'train': [], 'val': []}
         if save:
             print('Saving best model...')
             model_filename = './modular_network/models/resnet50_{}_model_{}_{}.pth'.format('supercategories',
@@ -83,5 +80,3 @@ for optimizer in optimizers:
             with open(results_filename, 'wb') as output:
                 pickle.dump(results, output, pickle.HIGHEST_PROTOCOL)
             print('Results saved.')
-
-        model.test('categories_net')

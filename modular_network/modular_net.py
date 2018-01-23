@@ -153,7 +153,7 @@ class ModularNetwork(object):
         model.load_state_dict(best_models[what])
         return model, hist_acc, hist_loss
 
-    def test(self, what):
+    def test(self):
         # Build the network
         print('Building the model...')
         model = self.feat_model
@@ -161,8 +161,9 @@ class ModularNetwork(object):
         print('Done.')
 
         model.eval()
-        test_loss = 0
-        correct = 0
+        # test_loss = 0
+        correct_core = 0  # Number of correct predictions for the supercategories
+        correct_species = 0  # Number of correct predictions for the single species
         print('Starting testing...')
         for data, (supercategories_targets, species_targets) in self.loaders['test']:
             if self.cuda:
@@ -174,18 +175,23 @@ class ModularNetwork(object):
             model.fc = self.categories_model_fc
             supercategory_outputs = np.argmax(torch.nn.functional.softmax(model(data), dim=0).data, axis=1)
             for index, output in enumerate(supercategory_outputs):
-                if what != 'categories_net':
+                print('Checking output of core network...')
+                print(supercategories_targets.int)
+                # only if supercategory classification is correct check single species
+                if output == int(supercategories_targets[index]):
+                    print('Output of core network correct.')
+                    correct_core += 1
                     model.fc = self.mini_net_model[self.categories[output]]
                     species_output = model(data)
-                    test_loss += F.nll_loss(species_output, species_targets[index], size_average=False).data[0]
-                    pred = species_output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
-                    correct += pred.eq(species_targets.data.view_as(pred)).cpu().sum()
-                else:
-                    test_loss += F.nll_loss(output, Variable(supercategories_targets[index]), size_average=False).data[0]
-                    pred = output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
-                    correct += pred.eq(supercategories_targets[index].data.view_as(pred)).cpu().sum()
+                    pred = species_output.data.max(1, keepdim=True)[1]
+                    correct_species += pred.eq(species_targets.data.view_as(pred)).cpu().sum()
 
-        test_loss /= len(self.loaders['test'].dataset)
-        print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-            test_loss, correct, len(self.loaders['test'].dataset),
-            100. * correct / len(self.loaders['test'].dataset)))
+        # test_loss /= len(self.loaders['test'].dataset)
+        print('\nTest set: Accuracy on core network: {}/{} ({:.0f}%)\n'.format(correct_core,
+                                                                               len(self.loaders['test'].dataset),
+                                                                               100. * correct_core /
+                                                                               len(self.loaders['test'].dataset)))
+        print('\nTest set: Accuracy on branch networks: {}/{} ({:.0f}%)\n'.format(correct_species,
+                                                                                  len(self.loaders['test'].dataset),
+                                                                                  100. * correct_species /
+                                                                                  len(self.loaders['test'].dataset)))
