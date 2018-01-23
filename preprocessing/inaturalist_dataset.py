@@ -98,6 +98,3 @@ class INaturalistDataset(data.Dataset):
 
     def __len__(self):
         return len(self.all_ids)
-
-    def get_size(self):
-        return self.__len__()

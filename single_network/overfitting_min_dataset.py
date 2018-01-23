@@ -27,10 +27,10 @@ output_categories = 3
 optimizer = optim.Adam
 
 # set directories
-data_dir = './data_preprocessed/'
-annotations_dir = './annotations/single_network/'
-train_annotations = '{}train2017.json'.format(annotations_dir)
-val_annotations = '{}val2017.json'.format(annotations_dir)
+data_dir = './data_min_preprocessed/'
+annotations_dir = './annotations/modular_network/Mammalia/'
+train_annotations = '{}train2017_min.json'.format(annotations_dir)
+val_annotations = '{}val2017_min.json'.format(annotations_dir)
 
 # create data sets
 applied_transformation = transforms.Compose([transforms.ToTensor()])
@@ -69,6 +69,7 @@ def train(epoch):
 
         # initialization
         _, target = targets
+        # print(data.shape)
         data, (target) = Variable(data), Variable(target)
         if cuda:
             data, target = data.cuda(), target.cuda()

@@ -43,7 +43,7 @@ class Preprocessor(object):
 
     def process_single_image(self, image):
         if image.mode != "RGB":
-            image.convert("RGB")
+            image = image.convert("RGB")
             # print("Image converted!")
         return image.resize(self.final_size)
 
