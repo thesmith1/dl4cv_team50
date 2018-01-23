@@ -74,10 +74,10 @@ class ModularNetwork(object):
             raise AttributeError('Invalid choice of optimizer')
         scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
-        best_models = {what: copy.deepcopy(model.state_dict())}
+        # best_models = {what: copy.deepcopy(model.state_dict())}
+        best_models = {what: model}
         best_acc = 0.0
 
-        # Keep track of training and validation accuracy: from these make a plot
         hist_acc = {'train': [], 'val': []}
         hist_loss = {'train': [], 'val': []}
 
@@ -161,7 +161,6 @@ class ModularNetwork(object):
         print('Done.')
 
         model.eval()
-        # test_loss = 0
         correct_core = 0  # Number of correct predictions for the supercategories
         correct_species = 0  # Number of correct predictions for the single species
         print('Starting testing...')
@@ -175,18 +174,14 @@ class ModularNetwork(object):
             model.fc = self.categories_model_fc
             supercategory_outputs = np.argmax(torch.nn.functional.softmax(model(data), dim=0).data, axis=1)
             for index, output in enumerate(supercategory_outputs):
-                print('Checking output of core network...')
-                print(supercategories_targets.int)
                 # only if supercategory classification is correct check single species
-                if output == int(supercategories_targets[index]):
-                    print('Output of core network correct.')
+                if output == supercategories_targets[index].int:
                     correct_core += 1
                     model.fc = self.mini_net_model[self.categories[output]]
                     species_output = model(data)
                     pred = species_output.data.max(1, keepdim=True)[1]
                     correct_species += pred.eq(species_targets.data.view_as(pred)).cpu().sum()
 
-        # test_loss /= len(self.loaders['test'].dataset)
         print('\nTest set: Accuracy on core network: {}/{} ({:.0f}%)\n'.format(correct_core,
                                                                                len(self.loaders['test'].dataset),
                                                                                100. * correct_core /

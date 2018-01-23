@@ -11,9 +11,9 @@ sys.path.append(lib_path)
 from preprocessing.preprocessor import Preprocessor
 
 data_dir = './data/'
-annotations_dir = './annotations/single_network/'
+annotations_dir = './annotations/'
 dest_dir = './data_preprocessed/'
-include_test_set = True
+include_test_set = False
 
 train_annotations = '{}train2017.json'.format(annotations_dir)
 val_annotations = '{}val2017.json'.format(annotations_dir)

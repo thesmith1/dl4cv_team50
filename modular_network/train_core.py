@@ -1,5 +1,5 @@
 """
-This script launches the training and test on the core of the modular network,
+This script launches the training on the core of the modular network,
 the one which classifies the supercategories;
 at the end of the process, it will save the results and the best model
 """
@@ -33,8 +33,7 @@ num_species = {'Actinopterygii': 53, 'Amphibia': 115, 'Animalia': 77, 'Arachnida
                 'Aves': 964, 'Chromista': 9, 'Fungi': 121, 'Insecta': 1021, 'Mammalia': 186,
                 'Mollusca': 93, 'Plantae': 2101, 'Protozoa': 4, 'Reptilia': 289}
 
-# data_dir = './data_preprocessed/'  # TODO
-data_dir = './data2/'
+data_dir = './data_preprocessed/'
 
 batch_size = 128
 num_epochs = 1
@@ -42,7 +41,7 @@ start_lr = 1000
 optimizers = ['sgd', 'adam', 'rmsprop']
 loss_functions = ['cross_entropy', 'l1', 'nll', 'l2']
 
-annotations_dir = './annotations/modular_network/Mammalia/'
+annotations_dir = './annotations/modular_network/'
 train_annotations = '{}train2017_min.json'.format(annotations_dir)
 val_annotations = '{}val2017_min.json'.format(annotations_dir)
 
@@ -65,8 +64,6 @@ for optimizer in optimizers:
                                cuda)
 
         best_model, hist_acc, hist_loss = model.train('categories_net', num_epochs)
-        hist_acc = {'train': [], 'val': []}
-        hist_loss = {'train': [], 'val': []}
         if save:
             print('Saving best model...')
             model_filename = './modular_network/models/resnet50_{}_model_{}_{}.pth'.format('supercategories',
