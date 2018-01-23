@@ -80,4 +80,4 @@ if args.save:
     torch.save(model, './mod1.pth')
     print('Best model saved.')
 
-model.test('categories_net')
+model.test()
