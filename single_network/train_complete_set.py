@@ -29,13 +29,13 @@ optimizer = optim.Adam
 
 # set directories
 data_dir = './data/'
-annotations_dir = './annotations/single_network/'
+annotations_dir = './annotations/'
 train_annotations = '{}train2017.json'.format(annotations_dir)
 val_annotations = '{}val2017.json'.format(annotations_dir)
 
 # create data sets
-applied_transformation = transforms.Compose([transforms.Resize((224, 224)), transforms.ToTensor()])
-# applied_transformation = transforms.Compose([transforms.ToTensor()])
+# applied_transformation = transforms.Compose([transforms.Resize((224, 224)), transforms.ToTensor()])
+applied_transformation = transforms.Compose([transforms.ToTensor()])
 inaturalist_train = INaturalistDataset(data_dir, train_annotations, transform=applied_transformation,
                                        modular_network_remap=False)
 inaturalist_val = INaturalistDataset(data_dir, val_annotations, transform=applied_transformation,
@@ -71,7 +71,7 @@ def train(epoch):
 
         # keep only species target
         _, target = targets
-        print(data.shape)
+        print("Batch dim:", data.shape)
         data, (target) = Variable(data), Variable(target)
         if cuda:
             data, target = data.cuda(), target.cuda()
