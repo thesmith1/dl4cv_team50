@@ -10,13 +10,13 @@ sys.path.append(lib_path)
 
 from preprocessing.preprocessor import Preprocessor
 
-data_dir = './data_min/'
-annotations_dir = './annotations/modular_network/Animalia/'
-dest_dir = './data_min2/'
-include_test_set = False
+data_dir = './data/'
+annotations_dir = './annotations/single_network/'
+dest_dir = './data_preprocessed/'
+include_test_set = True
 
-train_annotations = '{}train2017_min.json'.format(annotations_dir)
-val_annotations = '{}val2017_min.json'.format(annotations_dir)
+train_annotations = '{}train2017.json'.format(annotations_dir)
+val_annotations = '{}val2017.json'.format(annotations_dir)
 if include_test_set:
     test_annotations = '{}test2017.json'.format(annotations_dir)
 

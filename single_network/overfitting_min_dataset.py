@@ -6,6 +6,8 @@ import sys, os
 lib_path = os.path.abspath(os.path.join(__file__, '../..'))
 sys.path.append(lib_path)
 
+# print(sys.path)
+
 from preprocessing.inaturalist_dataset import INaturalistDataset
 import torch.nn as nn
 import torch.utils.data
@@ -13,7 +15,7 @@ import torch.optim as optim
 from torchvision import models, transforms
 from torch.autograd import Variable
 
-cuda = torch.cuda.is_available()
+cuda = False # torch.cuda.is_available()
 
 # parameters
 batch_size = 10
@@ -25,10 +27,10 @@ output_categories = 3
 optimizer = optim.Adam
 
 # set directories
-data_dir = './data_min2/'
+data_dir = './data_preprocessed/'
 annotations_dir = './annotations/single_network/'
-train_annotations = '{}train2017_min.json'.format(annotations_dir)
-val_annotations = '{}val2017_min.json'.format(annotations_dir)
+train_annotations = '{}train2017.json'.format(annotations_dir)
+val_annotations = '{}val2017.json'.format(annotations_dir)
 
 # create data sets
 applied_transformation = transforms.Compose([transforms.ToTensor()])
@@ -65,7 +67,7 @@ def train(epoch):
 
         # initialization
         _, target = targets
-        data, target = Variable(data), Variable(target)
+        data, (target) = Variable(data), Variable(target)
         if cuda:
             data, target = data.cuda(), target.cuda()
         optimizer.zero_grad()

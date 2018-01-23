@@ -28,24 +28,29 @@ class INaturalistDataset(data.Dataset):
         get_size: returns the size of the total dataset
     """
 
-    def __init__(self, root, annotations, transform):
+    def __init__(self, root, annotations, transform, modular_network_remap=True):
         from pycocotools.coco import COCO
         self.root = os.path.expanduser(root)
         self.coco = COCO(annotations)
         self.transform = transform
         self.all_ids = list(self.coco.imgs.keys())
+	self.modular_network_remap = modular_network_remap
 
         # produce supercategory remapper
         all_categories = self.coco.cats
         all_supercategories = {cat['supercategory'] for cat in all_categories.values()}
         self.supercat_remapper = LabelRemapper(all_supercategories)
 
-        # produce single category remappers, stored in a dict
-        self.category_remappers = dict()
-        for supercategory in all_supercategories:
-            intra_category_ids = {cat['id'] for cat in all_categories.values() if cat['supercategory'] == supercategory}
-            category_remapper = LabelRemapper(intra_category_ids)
-            self.category_remappers[supercategory] = category_remapper
+	if modular_network_remap:
+        	# produce single category remappers, stored in a dict
+        	self.category_remappers = dict()
+        	for supercategory in all_supercategories:
+            		intra_category_ids = {cat['id'] for cat in all_categories.values() if cat['supercategory'] == supercategory}
+            		category_remapper = LabelRemapper(intra_category_ids)
+            	self.category_remappers[supercategory] = category_remapper
+	else:
+		all_category_ids = {cat['id'] for cat in all_categories.values()} 
+		self.category_remapper = LabelRemapper(all_category_ids)
 
     def __getitem__(self, index):
         # print('Loading image', index)
@@ -73,8 +78,10 @@ class INaturalistDataset(data.Dataset):
             category_id = ann[0]['category_id']
             supercategory = coco.cats[category_id]['supercategory']
             supercategory_target = self.supercat_remapper[supercategory]
-            category_target = self.category_remappers[supercategory][category_id]
-
+	    if self.modular_network_remap:
+            	category_target = self.category_remappers[supercategory][category_id]
+	    else:
+		category_target = self.category_remapper[category_id]
         except FileNotFoundError as e:
             print(e)
             img = None
