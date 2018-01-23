@@ -1,10 +1,8 @@
 import torch.utils.data as data
 import os
 import os.path
-import skimage.io as io
 from PIL import Image
 from pycocotools.coco import COCO
-from preprocessing import preprocessor
 
 
 class LabelRemapper(object):
@@ -58,34 +56,29 @@ class INaturalistDataset(data.Dataset):
         # print('Loading image', index)
 
         # find image id given index
-        coco = self.coco
         img_id = self.all_ids[index]
 
         # find image given image id
-        img_ref = coco.loadImgs(img_id)
+        img_ref = self.coco.loadImgs(img_id)
 
         try:
             # imgs = [io.imread(self.root + img_ref[i]['file_name']) for i, img in enumerate(img_ref)]
-            img = io.imread(self.root + img_ref[0]['file_name'])
+            img = Image.open(self.root + img_ref[0]['file_name'])
             # imgs = [preprocessor.normalize(img) for img in imgs]
-
-            # img = preprocessor.normalize(img)
-            img = Image.fromarray(img)
 
             # correct grayscale images
             if img.mode != "RGB":
-                img = img.convert("RGB")
+                img.convert("RGB")
                 print("\n\n\nImage converted! \n\n\n")
 
             if self.transform:
                 img = self.transform(img)
 
             # find annotation of the image
-            ann_id = coco.getAnnIds(imgIds=img_id)
-            ann = coco.loadAnns(ann_id)
-
+            ann_id = self.coco.getAnnIds(imgIds=img_id)
+            ann = self.coco.loadAnns(ann_id)
             category_id = ann[0]['category_id']
-            supercategory = coco.cats[category_id]['supercategory']
+            supercategory = self.coco.cats[category_id]['supercategory']
             supercategory_target = self.supercat_remapper[supercategory]
 
             if self.modular_network_remap:
