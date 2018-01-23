@@ -2,8 +2,10 @@ import argparse
 import os
 import sys
 
+import numpy as np
+import matplotlib.pyplot as plt
+
 import torch
-import torch.nn as nn
 from torchvision import transforms
 
 lib_path = os.path.abspath(os.path.join(__file__, '../..'))
@@ -38,7 +40,7 @@ if args.cuda:
     torch.cuda.manual_seed(args.seed)
 print('Starting script...')
 print('Checking cuda...')
-print('Cuda is ', args.cuda)
+print('Cuda is', args.cuda)
 
 data_dir = './data2/'
 annotations_dir = './annotations/modular_network/Mammalia/'
@@ -48,26 +50,34 @@ val_annotations = '{}val2017_min.json'.format(annotations_dir)
 transf = transforms.ToTensor()
 
 print('Loading dataset...')
-inaturalist_train = INaturalistDataset(data_dir, train_annotations, transform=transf, classify_supercategories=False)
-inaturalist_val = INaturalistDataset(data_dir, val_annotations, transform=transf, classify_supercategories=False)
+inaturalist_train = INaturalistDataset(data_dir, train_annotations, transform=transf)
+inaturalist_val = INaturalistDataset(data_dir, val_annotations, transform=transf)
 print('Dataset loaded.')
 
 train_loader = torch.utils.data.DataLoader(inaturalist_train, batch_size=args.batch_size, shuffle=True)
 val_loader = torch.utils.data.DataLoader(inaturalist_val, batch_size=args.batch_size, shuffle=True)
 
-loss_function = nn.CrossEntropyLoss()
-# Alternatives for loss function are:
-# L1, MSELoss (L2), NLLLoss
-
 train_params = {'optimizer': 'sgd', 'learning_rate': args.lr}
+loss_function = 'cross_entropy'
 
-# model
-model = ModularNetwork({'train': inaturalist_train, 'val': inaturalist_val}, train_loader, val_loader, train_params,
-                       loss_function, args.cuda)
+model = ModularNetwork({'train': inaturalist_train, 'val': inaturalist_val, 'test': inaturalist_val},
+                       {'train': train_loader, 'val': val_loader, 'test': val_loader}, train_params, loss_function,
+                       args.cuda)
 
-model.train('Mammalia', args.epochs)
+best_model, hist_acc, hist_loss = model.train('Mammalia', args.epochs)
 
+print(hist_acc, hist_loss)
+'''
+x_axis = np.arange(0, args.epochs, 1)
+figure, ax = plt.subplots()
+ax.plot(x_axis, hist_acc['train'])
+ax.set(xlabel='Epochs', ylabel='Training accuracy')
+ax.grid()
+plt.show()
+'''
 if args.save:
     print('Saving best model...')
     torch.save(model, './mod1.pth')
     print('Best model saved.')
+
+model.test('categories_net')

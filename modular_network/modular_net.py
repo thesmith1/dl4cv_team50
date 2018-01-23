@@ -1,8 +1,10 @@
 import copy
 import time
 
+import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 import torchvision.models as models
 from torch.autograd import Variable
@@ -10,7 +12,7 @@ from torch.optim import lr_scheduler
 
 
 class ModularNetwork(object):
-    def __init__(self, datasets, train_loader, val_loader, train_params, loss_function, cuda_avail=False):
+    def __init__(self, datasets, loaders, train_params, loss_function, cuda_avail=False):
         self.categories = ['Actinopterygii', 'Amphibia', 'Animalia', 'Arachnida', 'Aves', 'Chromista',
                            'Fungi', 'Insecta', 'Mammalia', 'Mollusca', 'Plantae', 'Protozoa', 'Reptilia']
         self.num_species = {'Actinopterygii': 53, 'Amphibia': 115, 'Animalia': 77, 'Arachnida': 56,
@@ -18,10 +20,19 @@ class ModularNetwork(object):
                             'Mollusca': 93, 'Plantae': 2101, 'Protozoa': 4, 'Reptilia': 289}
         self.num_classes = len(self.categories)
         self.datasets = datasets
-        self.loaders = {'train': train_loader, 'val': val_loader}
+        self.loaders = loaders
         self.optimizer = train_params['optimizer']
         self.learning_rate = train_params['learning_rate']
-        self.loss_function = loss_function
+        if loss_function == 'cross_entropy':
+            self.loss_function = nn.CrossEntropyLoss()
+        elif loss_function == 'l1':
+            self.loss_function = nn.L1Loss()
+        elif loss_function == 'nll':
+            self.loss_function = nn.NLLLoss()
+        elif loss_function == 'l2':
+            self.loss_function = nn.MSELoss()
+        else:
+            raise AttributeError('Invalid choice of loss function')
         self.cuda = cuda_avail
         # The big network which classifies categories
         print('Loading the network for categories...')
@@ -55,12 +66,20 @@ class ModularNetwork(object):
 
         if self.optimizer == 'sgd':
             optimizer = optim.SGD(model.fc.parameters(), lr=self.learning_rate, momentum=0.9)
+        elif self.optimizer == 'adam':
+            optimizer = optim.Adam(model.fc.parameters(), lr=self.learning_rate)
+        elif self.optimizer == 'rmsprop':
+            optimizer = optim.RMSprop(model.fc.parameters(), lr=self.learning_rate, momentum=0.9)
         else:
-            optimizer = None  # TODO: missing implementation of other optimizers
+            raise AttributeError('Invalid choice of optimizer')
         scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
         best_models = {what: copy.deepcopy(model.state_dict())}
         best_acc = 0.0
+
+        # Keep track of training and validation accuracy: from these make a plot
+        hist_acc = {'train': [], 'val': []}
+        hist_loss = {'train': [], 'val': []}
 
         print('Starting training...')
         for epoch in range(num_epochs):
@@ -76,18 +95,22 @@ class ModularNetwork(object):
 
                 running_loss = 0.0
                 running_corrects = 0
-
+                '''
                 # Iterate over data
-                for data in self.loaders[phase]:
-                    # get the inputs
-                    inputs, labels = data
-
+                for inputs, (supercategory_targets, species_targets) in self.loaders[phase]:
                     # wrap them in Variable
                     if self.cuda:
                         inputs = Variable(inputs.cuda())
-                        labels = Variable(labels.cuda())
+                        if what == 'categories_net':
+                            labels = Variable(supercategory_targets.cuda())
+                        else:
+                            labels = Variable(species_targets.cuda())
                     else:
-                        inputs, labels = Variable(inputs), Variable(labels)
+                        inputs = Variable(inputs)
+                        if what == 'categories_net':
+                            labels = Variable(supercategory_targets)
+                        else:
+                            labels = Variable(species_targets)
 
                     # zero the parameter gradients
                     optimizer.zero_grad()
@@ -105,10 +128,13 @@ class ModularNetwork(object):
                     # statistics
                     running_loss += loss.data[0] * inputs.size(0)
                     running_corrects += torch.sum(preds == labels.data)
-                    print('Running loss is ', running_loss)
-
+                    print('Running loss is', running_loss)
+                '''
                 epoch_loss = running_loss / len(self.datasets[phase])
                 epoch_acc = running_corrects / len(self.datasets[phase])
+
+                hist_acc[phase].append(epoch_acc)
+                hist_loss[phase].append(epoch_loss)
 
                 print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                     phase, epoch_loss, epoch_acc))
@@ -125,7 +151,41 @@ class ModularNetwork(object):
 
         # load best model weights
         model.load_state_dict(best_models[what])
-        return model
+        return model, hist_acc, hist_loss
 
-    def test(self):
-        pass
+    def test(self, what):
+        # Build the network
+        print('Building the model...')
+        model = self.feat_model
+        model.fc = self.categories_model_fc
+        print('Done.')
+
+        model.eval()
+        test_loss = 0
+        correct = 0
+        print('Starting testing...')
+        for data, (supercategories_targets, species_targets) in self.loaders['test']:
+            if self.cuda:
+                data, supercategories_targets, species_targets = data.cuda(), supercategories_targets.cuda(), \
+                                                                 species_targets.cuda()
+            data, supercategories_targets, species_targets = Variable(data, volatile=True), \
+                                                             Variable(supercategories_targets), \
+                                                             Variable(species_targets)
+            model.fc = self.categories_model_fc
+            supercategory_outputs = np.argmax(torch.nn.functional.softmax(model(data), dim=0).data, axis=1)
+            for index, output in enumerate(supercategory_outputs):
+                if what != 'categories_net':
+                    model.fc = self.mini_net_model[self.categories[output]]
+                    species_output = model(data)
+                    test_loss += F.nll_loss(species_output, species_targets[index], size_average=False).data[0]
+                    pred = species_output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
+                    correct += pred.eq(species_targets.data.view_as(pred)).cpu().sum()
+                else:
+                    test_loss += F.nll_loss(output, Variable(supercategories_targets[index]), size_average=False).data[0]
+                    pred = output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
+                    correct += pred.eq(supercategories_targets[index].data.view_as(pred)).cpu().sum()
+
+        test_loss /= len(self.loaders['test'].dataset)
+        print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+            test_loss, correct, len(self.loaders['test'].dataset),
+            100. * correct / len(self.loaders['test'].dataset)))
