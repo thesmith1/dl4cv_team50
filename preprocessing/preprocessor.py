@@ -17,6 +17,7 @@ class Preprocessor(object):
 
     def process_images(self, destination_root):
 
+        print("Starting preprocessing in %s" % destination_root)
         # create final root folder
         if not os.path.exists(destination_root):
             os.makedirs(destination_root)
@@ -44,7 +45,7 @@ class Preprocessor(object):
                 processed_image = self.process_single_image(image)
                 processed_image.save(destination_root + image_ref['file_name'])
                 image.close()
-        print("")
+        print("\ndone.")
 
     def process_single_image(self, image):
         if image.mode != "RGB":
