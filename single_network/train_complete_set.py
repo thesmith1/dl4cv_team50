@@ -30,8 +30,9 @@ optimizer = optim.Adam
 # set directories
 data_dir = './data/'
 annotations_dir = './annotations/'
-train_annotations = '{}train2017.json'.format(annotations_dir)
+train_annotations = '{}train2017_new.json'.format(annotations_dir)
 val_annotations = '{}val2017.json'.format(annotations_dir)
+test_annotations = '{}test2017_new.json'.format(annotations_dir)
 
 # create data sets
 # applied_transformation = transforms.Compose([transforms.Resize((224, 224)), transforms.ToTensor()])
@@ -40,10 +41,13 @@ inaturalist_train = INaturalistDataset(data_dir, train_annotations, transform=ap
                                        modular_network_remap=False)
 inaturalist_val = INaturalistDataset(data_dir, val_annotations, transform=applied_transformation,
                                      modular_network_remap=False)
+inaturalist_test = INaturalistDataset(data_dir, test_annotations, transform=applied_transformation,
+                                      modular_network_remap=False)
 
 # create loaders for the data sets
 train_loader = torch.utils.data.DataLoader(inaturalist_train, batch_size=batch_size, shuffle=True)
 val_loader = torch.utils.data.DataLoader(inaturalist_val, batch_size=batch_size, shuffle=True)
+test_loader = torch.utils.data.DataLoader(inaturalist_test, batch_size, shuffle=True)
 
 # get pre-trained model, change FC layer
 model = models.resnet50(pretrained=True)
@@ -146,13 +150,13 @@ if __name__ == '__main__':
     for epoch_count in range(1, epochs + 1):
         train(epoch_count)
 
-    # evaluation on train set
-    print("\n\nEvaluating model on training set...")
-    evaluate(train_loader)
-
     # evaluation on validation set
     print("Evaluating model on validation set...")
     evaluate(val_loader)
 
-    model_dict = copy.deep_copy(model.state_dict())
+    # evaluation on test set
+    print("\n\nEvaluating model on training set...")
+    evaluate(test_loader)
+
+    model_dict = copy.copy(model.state_dict())
     torch.save(model_dict, "model_single_epoch.pth")
