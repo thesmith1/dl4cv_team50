@@ -20,9 +20,10 @@ test_annotations = []
 test_images = []
 train_annotations = []
 train_images = []
+print("Loading JSON content...")
 for i, category in enumerate(coco.cats):
 
-    print("Completed %d/%d (%.2f%%)" % (i, len(coco.cats), i/len(coco.cats)), end='\r')
+    print("Completed %d/%d (%.2f%%)" % (i, len(coco.cats), i/len(coco.cats)*100), end='\r')
     # keep only annotations referred to this specific category
 
     filt_image_ids = sorted(coco.catToImgs[category])
@@ -33,18 +34,20 @@ for i, category in enumerate(coco.cats):
     # divide: test
     test_filt_image_ids = filt_image_ids[0:test_image_count]
     test_filt_images = [coco.imgs[image_id] for image_id in test_filt_image_ids]
-    test_filt_annotations = [coco.imgToAnns[image_id] for image_id in test_filt_image_ids]
+    test_filt_annotations = [coco.imgToAnns[image_id][0] for image_id in test_filt_image_ids]
     test_annotations.extend(test_filt_annotations)
     test_images.extend(test_filt_images)
 
     # divide: train
     train_filt_image_ids = filt_image_ids[test_image_count:]
     train_filt_images = [coco.imgs[image_id] for image_id in train_filt_image_ids]
-    train_filt_annotations = [coco.imgToAnns[image_id] for image_id in train_filt_image_ids]
+    train_filt_annotations = [coco.imgToAnns[image_id][0] for image_id in train_filt_image_ids]
     train_annotations.extend(train_filt_annotations)
     train_images.extend(train_filt_images)
+print("done.")
 
 # create test json
+print("Creating JSON files...", end='')
 test_set = json.load(open(src_annotations_train))
 test_set['images'] = test_images
 test_set['annotations'] = test_annotations
@@ -53,9 +56,14 @@ test_set['annotations'] = test_annotations
 train_set = json.load(open(src_annotations_train))
 train_set['images'] = train_images
 train_set['annotations'] = train_annotations
+print("done.")
 
 # save
+print("Saving...", end='')
 with open(dst_annotations_train, 'w') as train_file:
     json.dump(train_set, train_file)
 with open(dst_annotations_test, 'w') as test_file:
     json.dump(test_set, test_file)
+print("done.")
+
+print("Division completed.")
