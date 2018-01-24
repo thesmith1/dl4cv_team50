@@ -45,7 +45,6 @@ class ModularNetwork(object):
         # Create the smaller networks, one for each category
         print('Loading the smaller networks for the species...')
         self.mini_net_model = {}
-        self.num_species = {}
         for cat in self.categories:
             # self.num_species[cat] = 3  # TODO: delete this line to make it work with entire dataset
             self.mini_net_model[cat] = nn.Linear(num_feat, self.num_species[cat])
@@ -62,6 +61,11 @@ class ModularNetwork(object):
         else:
             model = self.feat_model
             model.fc = self.mini_net_model[what]
+        if self.cuda:
+            self.feat_model.cuda()
+            self.categories_model_fc.cuda()
+            for cat in self.categories:
+                self.mini_net_model[cat].cuda()
         print('Done.')
 
         if self.optimizer == 'sgd':
@@ -95,7 +99,7 @@ class ModularNetwork(object):
 
                 running_loss = 0.0
                 running_corrects = 0
-                '''
+
                 # Iterate over data
                 for inputs, (supercategory_targets, species_targets) in self.loaders[phase]:
                     # wrap them in Variable
@@ -129,7 +133,7 @@ class ModularNetwork(object):
                     running_loss += loss.data[0] * inputs.size(0)
                     running_corrects += torch.sum(preds == labels.data)
                     print('Running loss is', running_loss)
-                '''
+
                 epoch_loss = running_loss / len(self.datasets[phase])
                 epoch_acc = running_corrects / len(self.datasets[phase])
 
@@ -142,7 +146,7 @@ class ModularNetwork(object):
                 # deep copy the model
                 if phase == 'val' and epoch_acc > best_acc:
                     best_acc = epoch_acc
-                    best_models[what] = copy.deepcopy(model.state_dict())
+                    best_models[what] = model
 
         time_elapsed = time.time() - since
         print('Training complete in {:.0f}m {:.0f}s'.format(
@@ -150,12 +154,17 @@ class ModularNetwork(object):
         print('Best val Acc: {:4f}'.format(best_acc))
 
         # load best model weights
-        model.load_state_dict(best_models[what])
+        model = best_models[what]
         return model, hist_acc, hist_loss
 
     def test(self):
         # Build the network
         print('Building the model...')
+        if self.cuda:
+            self.feat_model.cuda()
+            self.categories_model_fc.cuda()
+            for cat in self.categories:
+                self.mini_net_model[cat].cuda()
         model = self.feat_model
         model.fc = self.categories_model_fc
         print('Done.')
