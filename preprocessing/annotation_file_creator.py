@@ -1,5 +1,5 @@
 """
-script used to produce a reduced version (some species only) of the complete dataset on JSON
+script used to produce a reduced version (some species only) of the complete dataset on JSON, for debugging purposes
 """
 
 import json
@@ -17,8 +17,8 @@ inputs
 '''
 
 # input paths
-src_annotations_train = './annotations/single_network/train2017.json'
-src_annotations_val = './annotations/single_network/val2017.json'
+src_annotations_train = './annotations/train2017.json'
+src_annotations_val = './annotations/val2017.json'
 mode = SPECIFIC_SPECIES
 
 # option for specific modes

@@ -22,7 +22,7 @@ cuda = torch.cuda.is_available()
 batch_size = 800
 lr = 1e-3
 epochs = 1
-log_interval = 1
+log_interval = 10
 loss = nn.CrossEntropyLoss()
 output_categories = 5089
 optimizer = optim.Adam
@@ -91,9 +91,9 @@ def train(epoch):
 
         # log
         if batch_idx % log_interval == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+            print('Train Epoch: {} [{}/{} ({:.2f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data),
-                len(train_loader.dataset), 100. * batch_idx / len(train_loader), loss_value.data[0]))
+                len(train_loader.dataset), 100. * batch_idx / len(train_loader), loss_value.data[0]), end='\r')
 
 
 def evaluate(dataset_loader):
@@ -102,11 +102,11 @@ def evaluate(dataset_loader):
     model.eval()
 
     # initialization
-    val_loss_value = 0
+    loss_value = 0
     correct = 0
 
     # for each batch
-    for data, targets in dataset_loader:
+    for batch_idx, (data, targets) in enumerate(dataset_loader):
 
         # keep only species target
         _, target = targets
@@ -119,17 +119,24 @@ def evaluate(dataset_loader):
         output = model(data)
 
         # compute loss
-        val_loss_value += loss(output, target).data[0]  # sum up batch loss
+        loss_value += loss(output, target).data[0]  # sum up batch loss
 
         # predict
         predicted_labels = output.data.max(1, keepdim=True)[1]  # get the index of the max log-probability
         correct += predicted_labels.eq(target.data.view_as(predicted_labels)).cpu().sum()
 
-    val_loss_value /= len(val_loader.dataset)
+        # log
+        if batch_idx % log_interval == 0:
+            print('Evaluated images: {}/{} ({:.2f}%)'.format(batch_idx * len(data),
+                                                               len(train_loader),
+                                                               100. * batch_idx / len(train_loader),
+                                                               loss_value.data[0]), end='')
 
-    # log
-    print('Evaluation results:\nAverage loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-        val_loss_value, correct, len(dataset_loader.dataset),
+    loss_value /= len(val_loader.dataset)
+
+    # final log
+    print('Evaluation results:\nAverage loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
+        loss_value, correct, len(dataset_loader.dataset),
         100. * correct / len(dataset_loader.dataset)))
 
 
