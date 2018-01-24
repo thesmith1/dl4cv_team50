@@ -13,7 +13,7 @@ from torchvision import transforms
 
 lib_path = os.path.abspath(os.path.join(__file__, '../..'))
 sys.path.append(lib_path)
-ext_lib_path = os.path.abspath(os.path.join(__file__, '../../preprocess'))
+ext_lib_path = os.path.abspath(os.path.join(__file__, '../../preprocessing'))
 sys.path.append(ext_lib_path)
 
 from inaturalist_dataset import INaturalistDataset
