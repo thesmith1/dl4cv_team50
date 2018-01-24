@@ -20,7 +20,7 @@ cuda = False # torch.cuda.is_available()
 # parameters
 batch_size = 10
 lr = 1e-3
-epochs = 10
+epochs = 1
 log_interval = 10
 loss = nn.CrossEntropyLoss()
 output_categories = 3

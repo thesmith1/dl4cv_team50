@@ -83,9 +83,10 @@ def train(epoch):
 
         # log
         if batch_idx % log_interval == 0:
-            print('Train Epoch: {} [{}/{} ({:.2f}%)]\tLoss: {:.6f}'.format(
+            print('Train Epoch: {} [{}/{} ({:.2f}%)] Loss: {:.6f}'.format(
                 epoch, batch_idx * len(data),
-                len(train_loader.dataset), 100. * batch_idx / len(train_loader), loss_value.data[0]), end='\r')
+                len(train_loader.dataset), 100. * batch_idx * len(data) / len(train_loader.dataset),
+                loss_value.data[0]), end='\r')
 
 
 def evaluate(dataset_loader):
@@ -120,8 +121,9 @@ def evaluate(dataset_loader):
         # log
         if batch_idx % log_interval == 0:
             print('Evaluated images: {}/{} ({:.2f}%)'.format(batch_idx * len(data),
-                                                               len(train_loader),
-                                                               100. * batch_idx / len(train_loader)), end='')
+                                                            len(dataset_loader.dataset),
+                                                            100. * batch_idx * len(data)/ len(dataset_loader.dataset)),
+                  end='\r')
 
     loss_value /= len(val_loader.dataset)
 
@@ -155,8 +157,8 @@ if __name__ == '__main__':
     inaturalist_test = INaturalistDataset(data_dir, test_annotations, transform=applied_transformations,
                                           modular_network_remap=False)
     test_loader = torch.utils.data.DataLoader(inaturalist_test, batch_size, shuffle=True)
-    print("Evaluating model on training set...")
-    evaluate(test_loader)
+    print("Evaluating model on test set...")
+    # evaluate(test_loader)
 
     model_dict = copy.copy(model.state_dict())
     torch.save(model_dict, "model_single_epoch.pth")
