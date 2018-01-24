@@ -17,7 +17,7 @@ class ModularNetwork(object):
                            'Fungi', 'Insecta', 'Mammalia', 'Mollusca', 'Plantae', 'Protozoa', 'Reptilia']
         self.num_species = {'Actinopterygii': 53, 'Amphibia': 115, 'Animalia': 77, 'Arachnida': 56,
                             'Aves': 964, 'Chromista': 9, 'Fungi': 121, 'Insecta': 1021, 'Mammalia': 186,
-                            'Mollusca': 93, 'Plantae': 2101, 'Protozoa': 4, 'Reptilia': 289
+                            'Mollusca': 93, 'Plantae': 2101, 'Protozoa': 4, 'Reptilia': 289}
         self.num_classes = len(self.categories)
         self.datasets = datasets
         self.loaders = loaders
