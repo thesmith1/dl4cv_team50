@@ -22,7 +22,10 @@ class Preprocessor(object):
             os.makedirs(destination_root)
 
         catIds = self.coco.getCatIds()
-        for cat in catIds:
+        for i, cat in enumerate(catIds):
+
+            print("Completed folders: %d/%d (%.2f%%) -- current category id: %d"
+                  % (i, len(catIds), i/len(catIds)*100, cat), end='\r')
             img_ids = self.coco.getImgIds(catIds=cat)
             images_ref = self.coco.loadImgs(img_ids)
             species_dir, _ = os.path.split(os.path.join(destination_root, images_ref[0]['file_name']))
@@ -41,6 +44,7 @@ class Preprocessor(object):
                 processed_image = self.process_single_image(image)
                 processed_image.save(destination_root + image_ref['file_name'])
                 image.close()
+        print("")
 
     def process_single_image(self, image):
         if image.mode != "RGB":
