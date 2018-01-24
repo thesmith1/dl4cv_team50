@@ -37,9 +37,12 @@ data_dir = './data_preprocessed/'
 
 batch_size = 128
 num_epochs = 1
-start_lr = 1000
-optimizers = ['sgd', 'adam', 'rmsprop']
-loss_functions = ['cross_entropy', 'l1', 'nll', 'l2']
+# start_lr = 1000
+# optimizers = ['sgd', 'adam', 'rmsprop']
+# loss_functions = ['cross_entropy', 'l1', 'nll', 'l2']
+start_lr = 1e-3
+optimizers = ['sgd']
+loss_functions = ['cross_entropy']
 
 annotations_dir = './annotations/modular_network/'
 train_annotations = '{}train2017_min.json'.format(annotations_dir)

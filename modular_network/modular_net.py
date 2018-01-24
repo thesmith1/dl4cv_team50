@@ -47,7 +47,7 @@ class ModularNetwork(object):
         self.mini_net_model = {}
         self.num_species = {}
         for cat in self.categories:
-            self.num_species[cat] = 3  # TODO: delete this line to make it work with entire dataset
+            # self.num_species[cat] = 3  # TODO: delete this line to make it work with entire dataset
             self.mini_net_model[cat] = nn.Linear(num_feat, self.num_species[cat])
         print('Done.')
 
@@ -190,3 +190,9 @@ class ModularNetwork(object):
                                                                                   len(self.loaders['test'].dataset),
                                                                                   100. * correct_species /
                                                                                   len(self.loaders['test'].dataset)))
+
+    def load_model(self, model, what):
+        if what == 'categories_net':
+            self.categories_model_fc = model
+        else:
+            self.mini_net_model[what] = model
