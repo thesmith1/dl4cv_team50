@@ -2,7 +2,7 @@
 """
 script for overfitting small dataset (see annotations/*_min.json)
 """
-import sys, os
+import sys, os, copy
 lib_path = os.path.abspath(os.path.join(__file__, '../..'))
 sys.path.append(lib_path)
 
@@ -144,3 +144,6 @@ if __name__ == '__main__':
     # evaluation on validation set
     print("Evaluating model on validation set...")
     evaluate(val_loader)
+
+    model_dict = copy.copy(model.state_dict())
+    torch.save(model_dict, "model_single_epoch.pth")

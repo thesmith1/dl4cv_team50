@@ -44,7 +44,7 @@ for i, category in enumerate(coco.cats):
     train_filt_annotations = [coco.imgToAnns[image_id][0] for image_id in train_filt_image_ids]
     train_annotations.extend(train_filt_annotations)
     train_images.extend(train_filt_images)
-print("done.")
+print("\ndone.")
 
 # create test json
 print("Creating JSON files...", end='')

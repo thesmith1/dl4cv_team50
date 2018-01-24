@@ -22,46 +22,34 @@ cuda = torch.cuda.is_available()
 batch_size = 800
 lr = 1e-3
 epochs = 1
-log_interval = 10
+log_interval = 1
 loss = nn.CrossEntropyLoss()
 output_categories = 5089
-optimizer = optim.Adam
+chosen_optimizer = optim.Adam
+chosen_model = models.resnet50
 
 # set directories
-data_dir = './data/'
+data_dir = './data_preprocessed/'
 annotations_dir = './annotations/'
 train_annotations = '{}train2017_new.json'.format(annotations_dir)
 val_annotations = '{}val2017.json'.format(annotations_dir)
 test_annotations = '{}test2017_new.json'.format(annotations_dir)
+applied_transformations = transforms.Compose([transforms.ToTensor()])
 
-# create data sets
-# applied_transformation = transforms.Compose([transforms.Resize((224, 224)), transforms.ToTensor()])
-applied_transformation = transforms.Compose([transforms.ToTensor()])
-inaturalist_train = INaturalistDataset(data_dir, train_annotations, transform=applied_transformation,
-                                       modular_network_remap=False)
-inaturalist_val = INaturalistDataset(data_dir, val_annotations, transform=applied_transformation,
-                                     modular_network_remap=False)
-inaturalist_test = INaturalistDataset(data_dir, test_annotations, transform=applied_transformation,
-                                      modular_network_remap=False)
-
-# create loaders for the data sets
-train_loader = torch.utils.data.DataLoader(inaturalist_train, batch_size=batch_size, shuffle=True)
-val_loader = torch.utils.data.DataLoader(inaturalist_val, batch_size=batch_size, shuffle=True)
-test_loader = torch.utils.data.DataLoader(inaturalist_test, batch_size, shuffle=True)
 
 # get pre-trained model, change FC layer
-model = models.resnet50(pretrained=True)
+model = chosen_model(pretrained=True)
 for param in model.parameters():
     param.requires_grad = False
 fc_in_features = model.fc.in_features
 model.fc = nn.Linear(fc_in_features, output_categories)
 
-# create optimizer
-optimizer = optimizer(model.fc.parameters(), lr=lr)
-
 # move model to GPU
 if cuda:
     model = model.cuda()
+
+# create optimizer
+optimizer = chosen_optimizer(model.fc.parameters(), lr=lr)
 
 
 # single epoch of training method
@@ -133,29 +121,41 @@ def evaluate(dataset_loader):
         if batch_idx % log_interval == 0:
             print('Evaluated images: {}/{} ({:.2f}%)'.format(batch_idx * len(data),
                                                                len(train_loader),
-                                                               100. * batch_idx / len(train_loader),
-                                                               loss_value.data[0]), end='')
+                                                               100. * batch_idx / len(train_loader)), end='')
 
     loss_value /= len(val_loader.dataset)
 
     # final log
-    print('Evaluation results:\nAverage loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
+    print('\nEvaluation results:\nAverage loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
         loss_value, correct, len(dataset_loader.dataset),
         100. * correct / len(dataset_loader.dataset)))
 
 
 if __name__ == '__main__':
 
-    # train
+    # training
+    print("\n\nLoading training set...")
+    inaturalist_train = INaturalistDataset(data_dir, train_annotations, transform=applied_transformations,
+                                           modular_network_remap=False)
+    train_loader = torch.utils.data.DataLoader(inaturalist_train, batch_size=batch_size, shuffle=True)
+    print("Starting training (%d epochs)" % epochs)
     for epoch_count in range(1, epochs + 1):
         train(epoch_count)
 
     # evaluation on validation set
+    print("\n\nLoading validation set...")
+    inaturalist_val = INaturalistDataset(data_dir, val_annotations, transform=applied_transformations,
+                                         modular_network_remap=False)
+    val_loader = torch.utils.data.DataLoader(inaturalist_val, batch_size=batch_size, shuffle=True)
     print("Evaluating model on validation set...")
     evaluate(val_loader)
 
     # evaluation on test set
-    print("\n\nEvaluating model on training set...")
+    print("\n\nLoading test set...")
+    inaturalist_test = INaturalistDataset(data_dir, test_annotations, transform=applied_transformations,
+                                          modular_network_remap=False)
+    test_loader = torch.utils.data.DataLoader(inaturalist_test, batch_size, shuffle=True)
+    print("Evaluating model on training set...")
     evaluate(test_loader)
 
     model_dict = copy.copy(model.state_dict())
