@@ -6,13 +6,15 @@ from pycocotools.coco import COCO
 
 
 class LabelRemapper(object):
+    """
+    class used to remap N integer labels from cluttered values to non-negative, contiguous, values in range [0, N-1].
+    """
     def __init__(self, all_labels):
-        self.single_classes = sorted(list(set(all_labels)))
-        self.class_count = len(self.single_classes)
-        self.class_map = {single_class: self.single_classes.index(single_class) for single_class in self.single_classes}
+        self.individual_labels = sorted(list(set(all_labels)))
+        self.label_map = {label: self.individual_labels.index(label) for label in self.individual_labels}
 
     def __getitem__(self, item):
-        return self.class_map[item]
+        return self.label_map[item]
 
 
 class INaturalistDataset(data.Dataset):
@@ -20,11 +22,10 @@ class INaturalistDataset(data.Dataset):
     The iNaturalist dataset object class
     Args:
         root (string): root directory where the images are (i.e. data/)
-        annotations (string): path to the json annotations file
+        annotations (string): path to the json annotations file (i.e. annotations/)
     Public methods:
         get_image: loads a single image; returns the image normalized (between -1 and 1) and its label
         get_images: loads multiple images and their labels (same behavior of get_image)
-        get_size: returns the size of the total dataset
     """
 
     def __init__(self, root, annotations, transform, modular_network_remap=True):
@@ -59,23 +60,23 @@ class INaturalistDataset(data.Dataset):
         img_id = self.all_ids[index]
 
         # find image given image id
-        img_ref = self.coco.loadImgs(img_id)
+        img_ref = self.coco.loadImgs(img_id)[0]
+        # imgs_ref = self.coco.loadImgs(img_id)
 
         try:
-            # imgs = [io.imread(self.root + img_ref[i]['file_name']) for i, img in enumerate(img_ref)]
-            img = Image.open(self.root + img_ref[0]['file_name'])
-            # imgs = [preprocessor.normalize(img) for img in imgs]
+            # open image
+            img = Image.open(self.root + img_ref['file_name'])
+            # imgs = [Image.open(self.root + img_ref[i]['file_name']) for i, img in enumerate(imgs_ref)]
 
             if self.transform:
                 img = self.transform(img)
 
             # find annotation of the image
-            ann_id = self.coco.getAnnIds(imgIds=img_id)
-            ann = self.coco.loadAnns(ann_id)
-            category_id = ann[0]['category_id']
+            category_id = self.coco.imgToAnns[img_id][0]['category_id']
             supercategory = self.coco.cats[category_id]['supercategory']
-            supercategory_target = self.supercat_remapper[supercategory]
 
+            # obtain remapped [0 to N-1] labels (to avoid pytorch pissing off)
+            supercategory_target = self.supercat_remapper[supercategory]
             if self.modular_network_remap:
                 category_target = self.category_remappers[supercategory][category_id]
             else:

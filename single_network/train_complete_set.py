@@ -71,7 +71,7 @@ def train(epoch):
 
         # keep only species target
         _, target = targets
-        print("Batch dim:", data.shape)
+        # print("Batch dim:", data.shape)
         data, (target) = Variable(data), Variable(target)
         if cuda:
             data, target = data.cuda(), target.cuda()
