@@ -17,9 +17,9 @@ inputs
 '''
 
 # input paths
-src_annotations_train = './annotations/train2017.json'
+src_annotations_train = './annotations/train2017_new.json'
 src_annotations_val = './annotations/val2017.json'
-mode = SPECIFIC_SPECIES
+mode = SPECIFIC_SUPERCATEGORY
 
 # option for specific modes
 if mode == SPECIFIC_SPECIES:
@@ -32,7 +32,7 @@ if mode == SPECIFIC_SPECIES:
 
 elif mode == SPECIFIC_SUPERCATEGORY:
 
-    supercategory_to_be_kept = 'Mammalia'
+    supercategory_to_be_kept = 'Chromista'
 
     dst_annotations_train = './annotations/modular_network/{}/train2017_min.json'.format(supercategory_to_be_kept)
     dst_annotations_val = './annotations/modular_network/{}/val2017_min.json'.format(supercategory_to_be_kept)
@@ -41,7 +41,7 @@ else:
 
 
 def species_of_supecategory(dataset, supecategory):
-    filt_species = [category for category in dataset['categories'] if category['supecategory'] == supecategory]
+    filt_species = [category for category in dataset['categories'] if category['supercategory'] == supecategory]
     return [species['name'] for species in filt_species]
 
 

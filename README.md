@@ -40,3 +40,11 @@ Next step: adapt that script to accept as arguments choices among optimizers and
 The class ModularNetwork now supports different loss functions and optimizers and implements the methods train() and test(): we are ready for training.
 
 Next step: code for saving results of training and test.
+
+### 25/01/2018: Giorgio
+The core of the modular network has been trained, without data augmentation, here the results:
+* train accuracy: 78%
+* validation accuracy: 79%
+* epochs: 1
+* learning rate: 1e-3
+* total time: 5h 30m
