@@ -6,6 +6,7 @@ import json
 
 SPECIFIC_SPECIES = 0
 SPECIFIC_SUPERCATEGORY = 1
+SET_OF_SUPERCATEGORIES = 2
 
 species_to_be_kept = []
 supercategory_to_be_kept = None
@@ -19,7 +20,7 @@ inputs
 # input paths
 src_annotations_train = './annotations/train2017_new.json'
 src_annotations_val = './annotations/val2017.json'
-mode = SPECIFIC_SUPERCATEGORY
+mode = SET_OF_SUPERCATEGORIES
 
 # option for specific modes
 if mode == SPECIFIC_SPECIES:
@@ -36,12 +37,19 @@ elif mode == SPECIFIC_SUPERCATEGORY:
 
     dst_annotations_train = './annotations/modular_network/{}/train2017_min.json'.format(supercategory_to_be_kept)
     dst_annotations_val = './annotations/modular_network/{}/val2017_min.json'.format(supercategory_to_be_kept)
+
+elif mode == SET_OF_SUPERCATEGORIES:
+    supercategories_to_be_kept = ['Reptilia', 'Mammalia', 'Animalia', 'Amphibia']
+
+    dst_annotations_train = './annotations/reduced_dataset_train2017.json'
+    dst_annotations_val = './annotations/reduced_dataset_val2017.json'
 else:
     exit(-1)
 
 
-def species_of_supecategory(dataset, supecategory):
-    filt_species = [category for category in dataset['categories'] if category['supercategory'] == supecategory]
+def species_of_supecategory(dataset, current_supercategory):
+    filt_species = [category for category in dataset['categories'] if
+                    category['supercategory'] == current_supercategory]
     return [species['name'] for species in filt_species]
 
 
@@ -54,6 +62,12 @@ if __name__ == '__main__':
 
     if mode == SPECIFIC_SUPERCATEGORY:
         species_to_be_kept = species_of_supecategory(train_set, supercategory_to_be_kept)
+    elif mode == SET_OF_SUPERCATEGORIES:
+        species_to_be_kept = []
+        for supercategory in supercategories_to_be_kept:
+            current_species = species_of_supecategory(train_set, supercategory)
+            for species in current_species:
+                species_to_be_kept.append(species)
 
     # obtain all annotations
     train_annotations = train_set['annotations']
@@ -61,11 +75,13 @@ if __name__ == '__main__':
 
     # transform species to be kept to indexes
     subset_categories_indexes = [cat['id'] for cat in train_set['categories'] if cat['name'] in species_to_be_kept]
+    print(subset_categories_indexes)
 
     # obtain image ids for the images the required categories
     filtered_image_ids_train = [ann['image_id'] for ann in train_annotations if
                                 ann['category_id'] in subset_categories_indexes]
-    filtered_image_ids_val = [ann['image_id'] for ann in val_annotations if ann['category_id'] in subset_categories_indexes]
+    filtered_image_ids_val = [ann['image_id'] for ann in val_annotations if
+                              ann['category_id'] in subset_categories_indexes]
 
     # obtain images on the required categories (i.e. id in filtered image ids)
     filtered_imgs_train = [img for img in train_set['images'] if img['id'] in filtered_image_ids_train]

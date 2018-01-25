@@ -48,3 +48,8 @@ The core of the modular network has been trained, without data augmentation, her
 * epochs: 1
 * learning rate: 1e-3
 * total time: 5h 30m
+
+### 25/01/2018: Giorgio
+Only 4 supercategories over 13 are chosen from now on, in order to speed up the training process. They are Reptilia, Mammalia, Animalia and Amphibia.
+They have been chosen mainly because they together contribute to a reduction of the dataset to 1/7 of its size and because the ratio between their number of images and their number of species is high.
+The generate new annotations files have been included in the annotations folder (they are called reduced_dataset_train2017.json)
