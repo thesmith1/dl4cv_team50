@@ -29,26 +29,27 @@ print('Starting script...')
 print('Checking cuda...')
 print('Cuda is', cuda)
 
-categories = ['Actinopterygii', 'Amphibia', 'Animalia', 'Arachnida', 'Aves', 'Chromista',
-               'Fungi', 'Insecta', 'Mammalia', 'Mollusca', 'Plantae', 'Protozoa', 'Reptilia']
+# categories = ['Actinopterygii', 'Amphibia', 'Animalia', 'Arachnida', 'Aves', 'Chromista',
+#                'Fungi', 'Insecta', 'Mammalia', 'Mollusca', 'Plantae', 'Protozoa', 'Reptilia']
+categories = ['Amphibia', 'Animalia', 'Mammalia', 'Reptilia']
 num_species = {'Actinopterygii': 53, 'Amphibia': 115, 'Animalia': 77, 'Arachnida': 56,
                 'Aves': 964, 'Chromista': 9, 'Fungi': 121, 'Insecta': 1021, 'Mammalia': 186,
                 'Mollusca': 93, 'Plantae': 2101, 'Protozoa': 4, 'Reptilia': 289}
 
 data_dir = './data_preprocessed/'
 
-batch_size = 800
+batch_size = 850
 num_epochs = 1
 # start_lr = 1000
 # optimizers = ['sgd', 'adam', 'rmsprop']
 # loss_functions = ['cross_entropy', 'l1', 'nll', 'l2']
 start_lr = 1e-3
-optimizers = ['sgd']
+optimizers = ['adam']
 loss_functions = ['cross_entropy']
 
 annotations_dir = './annotations/'
-train_annotations = '{}train2017.json'.format(annotations_dir)
-val_annotations = '{}val2017.json'.format(annotations_dir)
+train_annotations = '{}reduced_dataset_train2017.json'.format(annotations_dir)
+val_annotations = '{}reduced_dataset_val2017.json'.format(annotations_dir)
 
 transf = transforms.ToTensor()
 

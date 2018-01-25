@@ -29,8 +29,9 @@ print('Starting script...')
 print('Checking cuda...')
 print('Cuda is', cuda)
 
-categories = ['Actinopterygii', 'Amphibia', 'Animalia', 'Arachnida', 'Aves', 'Chromista',
-               'Fungi', 'Insecta', 'Mammalia', 'Mollusca', 'Plantae', 'Protozoa', 'Reptilia']
+# categories = ['Actinopterygii', 'Amphibia', 'Animalia', 'Arachnida', 'Aves', 'Chromista',
+#                'Fungi', 'Insecta', 'Mammalia', 'Mollusca', 'Plantae', 'Protozoa', 'Reptilia']
+categories = ['Amphibia', 'Animalia', 'Mammalia', 'Reptilia']
 num_species = {'Actinopterygii': 53, 'Amphibia': 115, 'Animalia': 77, 'Arachnida': 56,
                 'Aves': 964, 'Chromista': 9, 'Fungi': 121, 'Insecta': 1021, 'Mammalia': 186,
                 'Mollusca': 93, 'Plantae': 2101, 'Protozoa': 4, 'Reptilia': 289}

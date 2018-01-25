@@ -13,8 +13,9 @@ from torch.optim import lr_scheduler
 
 class ModularNetwork(object):
     def __init__(self, datasets, loaders, train_params, loss_function, cuda_avail=False):
-        self.categories = ['Actinopterygii', 'Amphibia', 'Animalia', 'Arachnida', 'Aves', 'Chromista',
-                           'Fungi', 'Insecta', 'Mammalia', 'Mollusca', 'Plantae', 'Protozoa', 'Reptilia']
+        # self.categories = ['Actinopterygii', 'Amphibia', 'Animalia', 'Arachnida', 'Aves', 'Chromista',
+        #                    'Fungi', 'Insecta', 'Mammalia', 'Mollusca', 'Plantae', 'Protozoa', 'Reptilia']
+        self.categories = ['Amphibia', 'Animalia', 'Mammalia', 'Reptilia']
         self.num_species = {'Actinopterygii': 53, 'Amphibia': 115, 'Animalia': 77, 'Arachnida': 56,
                             'Aves': 964, 'Chromista': 9, 'Fungi': 121, 'Insecta': 1021, 'Mammalia': 186,
                             'Mollusca': 93, 'Plantae': 2101, 'Protozoa': 4, 'Reptilia': 289}
@@ -46,7 +47,6 @@ class ModularNetwork(object):
         print('Loading the smaller networks for the species...')
         self.mini_net_model = {}
         for cat in self.categories:
-            # self.num_species[cat] = 3  # TODO: delete this line to make it work with entire dataset
             self.mini_net_model[cat] = nn.Linear(num_feat, self.num_species[cat])
         print('Done.')
 
@@ -143,7 +143,7 @@ class ModularNetwork(object):
                 print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                     phase, epoch_loss, epoch_acc))
 
-                # deep copy the model
+                # if best model, save it
                 if phase == 'val' and epoch_acc > best_acc:
                     best_acc = epoch_acc
                     best_models[what] = model
