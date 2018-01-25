@@ -47,6 +47,7 @@ loss_functions = ['cross_entropy']
 # loss_functions = ['cross_entropy', 'l1', 'nll', 'l2']
 
 for cat in categories:
+    print('Start training of', cat)
     annotations_dir = './annotations/modular_network/{}/'.format(cat)
     train_annotations = '{}train2017_min.json'.format(annotations_dir, cat)
     val_annotations = '{}val2017_min.json'.format(annotations_dir, cat)

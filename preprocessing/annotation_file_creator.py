@@ -32,7 +32,7 @@ if mode == SPECIFIC_SPECIES:
 
 elif mode == SPECIFIC_SUPERCATEGORY:
 
-    supercategory_to_be_kept = 'Chromista'
+    supercategory_to_be_kept = 'Insecta'
 
     dst_annotations_train = './annotations/modular_network/{}/train2017_min.json'.format(supercategory_to_be_kept)
     dst_annotations_val = './annotations/modular_network/{}/val2017_min.json'.format(supercategory_to_be_kept)
