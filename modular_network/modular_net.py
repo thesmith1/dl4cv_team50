@@ -52,6 +52,30 @@ class ModularNetwork(object):
             self.mini_net_model[cat] = nn.Linear(num_feat, self.num_species[cat])
         print('Done.')
 
+    def set_parameters(self, datasets, loaders, train_params, loss_function, cuda_avail=False):
+        self.categories = ['Amphibia', 'Animalia', 'Mammalia', 'Reptilia']
+        self.num_species = {'Actinopterygii': 53, 'Amphibia': 115, 'Animalia': 77, 'Arachnida': 56,
+                            'Aves': 964, 'Chromista': 9, 'Fungi': 121, 'Insecta': 1021, 'Mammalia': 186,
+                            'Mollusca': 93, 'Plantae': 2101, 'Protozoa': 4, 'Reptilia': 289}
+        self.num_classes = len(self.categories)
+        self.datasets = datasets
+        self.loaders = loaders
+        self.optimizer = train_params['optimizer']
+        self.learning_rate = train_params['learning_rate']
+        self.gamma = train_params['gamma']
+        self.step_size = train_params['step_size']
+        if loss_function == 'cross_entropy':
+            self.loss_function = nn.CrossEntropyLoss()
+        elif loss_function == 'l1':
+            self.loss_function = nn.L1Loss()
+        elif loss_function == 'nll':
+            self.loss_function = nn.NLLLoss()
+        elif loss_function == 'l2':
+            self.loss_function = nn.MSELoss()
+        else:
+            raise AttributeError('Invalid choice of loss function')
+        self.cuda = cuda_avail
+
     def train(self, what, num_epochs):
         since = time.time()
 

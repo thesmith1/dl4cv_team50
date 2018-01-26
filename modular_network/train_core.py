@@ -17,8 +17,8 @@ sys.path.append(lib_path)
 ext_lib_path = os.path.abspath(os.path.join(__file__, '../../preprocessing'))
 sys.path.append(ext_lib_path)
 
-from preprocessing.inaturalist_dataset import INaturalistDataset
-from modular_network.modular_net import ModularNetwork
+from inaturalist_dataset import INaturalistDataset
+from modular_net import ModularNetwork
 
 parser = argparse.ArgumentParser(description='dl4cv_team50 Modular Network')
 parser.add_argument('--model', default=None, metavar='m', dest='model',
@@ -94,10 +94,14 @@ for optimizer in optimizers:
         else:
             print('Loading model from file...')
             model = torch.load(args.model)
-            print(model)
+            model.set_parameters({'train': inaturalist_train, 'val': inaturalist_val, 'test': None},
+                                   {'train': train_loader, 'val': val_loader, 'test': None}, train_params, loss,
+                                   cuda)
             print('Model loaded.')
 
         best_model, hist_acc, hist_loss = model.train('categories_net', num_epochs)
+        hist_acc = {'train': [], 'val': []}
+        hist_loss = {'train': [], 'val': []}
         if args.save:
             print('Saving best model...')
             model_filename = './modular_network/models/resnet50_{}_model_{}_{}.pth'.format('supercategories',
@@ -105,7 +109,16 @@ for optimizer in optimizers:
             torch.save(model, model_filename)
             print('Best model saved.')
             print('Saving results...')
-            results = {'accuracy': hist_acc, 'loss': hist_loss}
+            subfolders = args.model.split('.')[1].split('/')
+            old_results_filename = './' + subfolders[1] + '/results/' + subfolders[3] + '.pkl'
+            old_results = pickle.load(open(old_results_filename, 'rb'))
+            old_hist_acc = old_results['accuracy']
+            old_hist_loss = old_results['loss']
+            new_hist_acc = {'train': old_hist_acc['train'] + hist_acc['train'],
+                            'val': old_hist_acc['val'] + hist_acc['val']}
+            new_hist_loss = {'train': old_hist_loss['train'] + hist_loss['train'],
+                            'val': old_hist_loss['val'] + hist_loss['val']}
+            results = {'accuracy': new_hist_acc, 'loss': new_hist_loss}
             results_filename = './modular_network/results/resnet50_{}_results_{}_{}.pkl'.format('supercategories',
                                                                                                 optimizer, loss)
             with open(results_filename, 'wb') as output:
