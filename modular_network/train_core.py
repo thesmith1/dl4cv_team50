@@ -21,21 +21,21 @@ from inaturalist_dataset import INaturalistDataset
 from modular_net import ModularNetwork
 
 parser = argparse.ArgumentParser(description='dl4cv_team50 Modular Network')
-parser.add_argument('--save', type=bool, default=True, metavar='S', dest='save',
+parser.add_argument('--save', type=bool, default=True, metavar='s', dest='save',
                     help='whether to save the best model or not')
-parser.add_argument('--lr', type=float, default=1e-3, metavar='L', dest='lr',
+parser.add_argument('--lr', type=float, default=1e-3, metavar='l', dest='lr',
                     help='inital learning rate')
-parser.add_argument('--gamma', type=float, default=0.1, metavar='G', dest='gamma',
+parser.add_argument('--gamma', type=float, default=0.1, metavar='g', dest='gamma',
                     help='gamma for the lr scheduler')
-parser.add_argument('--step-size', type=int, default=1, metavar='T', dest='step_size',
+parser.add_argument('--step-size', type=int, default=1, metavar='t', dest='step_size',
                     help='step size for the lr scheduler')
-parser.add_argument('--batch-size', type=int, default=850, metavar='B', dest='batch_size',
+parser.add_argument('--batch-size', type=int, default=850, metavar='b', dest='batch_size',
                     help='batch size for training')
-parser.add_argument('--epochs', type=int, default=1, metavar='B', dest='epochs',
+parser.add_argument('--epochs', type=int, default=1, metavar='e', dest='epochs',
                     help='number of total epochs')
-parser.add_argument('--optimizers', default=None, metavar='O', dest='optimizers',
+parser.add_argument('--optimizers', default=None, nargs='+', metavar='o', dest='optimizers',
                     help='list of optimizers to be used')
-parser.add_argument('--loss-functions', default=None, metavar='F', dest='loss_functions',
+parser.add_argument('--loss-functions', default=None, nargs='+', metavar='f', dest='loss_functions',
                     help='list of loss functions to be used')
 args = parser.parse_args()
 
