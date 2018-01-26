@@ -20,7 +20,7 @@ inputs
 # input paths
 src_annotations_train = './annotations/train2017_new.json'
 src_annotations_val = './annotations/val2017.json'
-mode = SET_OF_SUPERCATEGORIES
+mode = SPECIFIC_SUPERCATEGORY
 
 # option for specific modes
 if mode == SPECIFIC_SPECIES:
@@ -33,7 +33,7 @@ if mode == SPECIFIC_SPECIES:
 
 elif mode == SPECIFIC_SUPERCATEGORY:
 
-    supercategory_to_be_kept = 'Insecta'
+    supercategory_to_be_kept = 'Reptilia'
 
     dst_annotations_train = './annotations/modular_network/{}/train2017_min.json'.format(supercategory_to_be_kept)
     dst_annotations_val = './annotations/modular_network/{}/val2017_min.json'.format(supercategory_to_be_kept)

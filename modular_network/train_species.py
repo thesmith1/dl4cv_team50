@@ -38,10 +38,10 @@ num_species = {'Actinopterygii': 53, 'Amphibia': 115, 'Animalia': 77, 'Arachnida
 
 data_dir = './data_preprocessed/'
 
-batch_size = 800
-num_epochs = 1
-start_lr = 1e-3
-optimizers = ['sgd']
+batch_size = 850
+num_epochs = 10
+start_lr = 1e-1
+optimizers = ['adam']
 loss_functions = ['cross_entropy']
 # start_lr = 1000
 # optimizers = ['sgd', 'adam', 'rmsprop']

@@ -76,7 +76,7 @@ class ModularNetwork(object):
             optimizer = optim.RMSprop(model.fc.parameters(), lr=self.learning_rate, momentum=0.9)
         else:
             raise AttributeError('Invalid choice of optimizer')
-        scheduler = lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
+        scheduler = lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.1)
 
         # best_models = {what: copy.deepcopy(model.state_dict())}
         best_models = {what: model}
