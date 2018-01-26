@@ -17,8 +17,8 @@ sys.path.append(lib_path)
 ext_lib_path = os.path.abspath(os.path.join(__file__, '../../preprocessing'))
 sys.path.append(ext_lib_path)
 
-from preprocessing.inaturalist_dataset import INaturalistDataset
-from modular_network.modular_net import ModularNetwork
+from inaturalist_dataset import INaturalistDataset
+from modular_net import ModularNetwork
 
 parser = argparse.ArgumentParser(description='dl4cv_team50 Modular Network')
 parser.add_argument('--model', default=None, metavar='m', dest='model',
@@ -94,7 +94,9 @@ for optimizer in optimizers:
         else:
             print('Loading model from file...')
             model = torch.load(args.model)
-            print(model)
+            model.set_parameters({'train': inaturalist_train, 'val': inaturalist_val, 'test': None},
+                                   {'train': train_loader, 'val': val_loader, 'test': None}, train_params, loss,
+                                   cuda)
             print('Model loaded.')
 
         best_model, hist_acc, hist_loss = model.train('categories_net', num_epochs)
