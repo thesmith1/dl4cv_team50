@@ -43,6 +43,8 @@ num_epochs = 10
 start_lr = 1e-1
 optimizers = ['adam']
 loss_functions = ['cross_entropy']
+gamma = 0.1
+step_size = 2
 # start_lr = 1000
 # optimizers = ['sgd', 'adam', 'rmsprop']
 # loss_functions = ['cross_entropy', 'l1', 'nll', 'l2']
@@ -65,7 +67,7 @@ for cat in categories:
 
     for optimizer in optimizers:
         for loss in loss_functions:
-            train_params = {'optimizer': optimizer, 'learning_rate': start_lr}
+            train_params = {'optimizer': optimizer, 'learning_rate': start_lr, 'gamma': gamma, 'step_size': step_size}
 
             model = ModularNetwork({'train': inaturalist_train, 'val': inaturalist_val, 'test': None},
                                    {'train': train_loader, 'val': val_loader, 'test': None}, train_params, loss,

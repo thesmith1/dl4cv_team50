@@ -7,6 +7,7 @@ at the end of the process, it will save the results and the best model
 import os
 import sys
 import pickle
+import argparse
 
 import torch
 from torchvision import transforms
@@ -18,6 +19,25 @@ sys.path.append(ext_lib_path)
 
 from inaturalist_dataset import INaturalistDataset
 from modular_net import ModularNetwork
+
+parser = argparse.ArgumentParser(description='dl4cv_team50 Modular Network')
+parser.add_argument('--save', type=bool, default=True, metavar='S', dest='save',
+                    help='whether to save the best model or not')
+parser.add_argument('--lr', type=float, default=1e-3, metavar='L', dest='lr',
+                    help='inital learning rate')
+parser.add_argument('--gamma', type=float, default=0.1, metavar='G', dest='gamma',
+                    help='gamma for the lr scheduler')
+parser.add_argument('--step-size', type=int, default=1, metavar='T', dest='step_size',
+                    help='step size for the lr scheduler')
+parser.add_argument('--batch-size', type=int, default=850, metavar='B', dest='batch_size',
+                    help='batch size for training')
+parser.add_argument('--epochs', type=int, default=1, metavar='B', dest='epochs',
+                    help='number of total epochs')
+parser.add_argument('--optimizers', default=None, metavar='O', dest='optimizers',
+                    help='list of optimizers to be used')
+parser.add_argument('--loss-functions', default=None, metavar='F', dest='loss_functions',
+                    help='list of loss functions to be used')
+args = parser.parse_args()
 
 cuda = torch.cuda.is_available()
 save = True
@@ -38,14 +58,21 @@ num_species = {'Actinopterygii': 53, 'Amphibia': 115, 'Animalia': 77, 'Arachnida
 
 data_dir = './data_preprocessed/'
 
-batch_size = 850
-num_epochs = 8
+batch_size = args.batch_size
+num_epochs = args.epochs
+# batch_size = 850
+# num_epochs = 8
 # start_lr = 1000
 # optimizers = ['sgd', 'adam', 'rmsprop']
 # loss_functions = ['cross_entropy', 'l1', 'nll', 'l2']
-start_lr = 1e-1
-optimizers = ['adam', 'sgd']
-loss_functions = ['cross_entropy']
+# start_lr = 1e-1
+start_lr = args.lr
+step_size = args.step_size
+gamma = args.gamma
+# optimizers = ['adam', 'sgd']
+# loss_functions = ['cross_entropy']
+optimizers = args.optimizers
+loss_functions = args.loss_functions
 
 annotations_dir = './annotations/'
 train_annotations = '{}reduced_dataset_train2017.json'.format(annotations_dir)
@@ -63,7 +90,7 @@ val_loader = torch.utils.data.DataLoader(inaturalist_val, batch_size=batch_size,
 
 for optimizer in optimizers:
     for loss in loss_functions:
-        train_params = {'optimizer': optimizer, 'learning_rate': start_lr}
+        train_params = {'optimizer': optimizer, 'learning_rate': start_lr, 'gamma': gamma, 'step_size': step_size}
 
         model = ModularNetwork({'train': inaturalist_train, 'val': inaturalist_val, 'test': None},
                                {'train': train_loader, 'val': val_loader, 'test': None}, train_params, loss,

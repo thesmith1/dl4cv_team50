@@ -24,6 +24,8 @@ class ModularNetwork(object):
         self.loaders = loaders
         self.optimizer = train_params['optimizer']
         self.learning_rate = train_params['learning_rate']
+        self.gamma = train_params['gamma']
+        self.step_size = train_params['step_size']
         if loss_function == 'cross_entropy':
             self.loss_function = nn.CrossEntropyLoss()
         elif loss_function == 'l1':
@@ -76,7 +78,7 @@ class ModularNetwork(object):
             optimizer = optim.RMSprop(model.fc.parameters(), lr=self.learning_rate, momentum=0.9)
         else:
             raise AttributeError('Invalid choice of optimizer')
-        scheduler = lr_scheduler.StepLR(optimizer, step_size=2, gamma=0.1)
+        scheduler = lr_scheduler.StepLR(optimizer, step_size=self.step_size, gamma=self.gamma)
 
         # best_models = {what: copy.deepcopy(model.state_dict())}
         best_models = {what: model}
