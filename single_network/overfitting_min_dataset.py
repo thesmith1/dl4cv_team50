@@ -15,7 +15,7 @@ import torch.optim as optim
 from torchvision import models, transforms
 from torch.autograd import Variable
 
-cuda = False # torch.cuda.is_available()
+cuda = torch.cuda.is_available()
 
 # parameters
 batch_size = 10
@@ -27,7 +27,7 @@ output_categories = 3
 optimizer = optim.Adam
 
 # set directories
-data_dir = './data_min_preprocessed/'
+data_dir = './data_min_preprocessed_224/'
 annotations_dir = './annotations/modular_network/Mammalia/'
 train_annotations = '{}train2017_min.json'.format(annotations_dir)
 val_annotations = '{}val2017_min.json'.format(annotations_dir)
