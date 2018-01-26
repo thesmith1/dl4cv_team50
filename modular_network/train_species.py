@@ -19,8 +19,26 @@ sys.path.append(ext_lib_path)
 from inaturalist_dataset import INaturalistDataset
 from modular_net import ModularNetwork
 
+parser = argparse.ArgumentParser(description='dl4cv_team50 Modular Network')
+parser.add_argument('--save', type=bool, default=True, metavar='s', dest='save',
+                    help='whether to save the best model or not')
+parser.add_argument('--lr', type=float, default=1e-3, metavar='l', dest='lr',
+                    help='inital learning rate')
+parser.add_argument('--gamma', type=float, default=0.1, metavar='g', dest='gamma',
+                    help='gamma for the lr scheduler')
+parser.add_argument('--step-size', type=int, default=1, metavar='t', dest='step_size',
+                    help='step size for the lr scheduler')
+parser.add_argument('--batch-size', type=int, default=850, metavar='b', dest='batch_size',
+                    help='batch size for training')
+parser.add_argument('--epochs', type=int, default=1, metavar='e', dest='epochs',
+                    help='number of total epochs')
+parser.add_argument('--optimizers', default=None, nargs='+', metavar='o', dest='optimizers',
+                    help='list of optimizers to be used')
+parser.add_argument('--loss-functions', default=None, nargs='+', metavar='f', dest='loss_functions',
+                    help='list of loss functions to be used')
+args = parser.parse_args()
+
 cuda = torch.cuda.is_available()
-save = True
 
 torch.manual_seed(1)
 if cuda:
@@ -38,14 +56,13 @@ num_species = {'Actinopterygii': 53, 'Amphibia': 115, 'Animalia': 77, 'Arachnida
 
 data_dir = './data_preprocessed/'
 
-batch_size = 850
-num_epochs = 10
-start_lr = 1e-1
-optimizers = ['adam']
-loss_functions = ['cross_entropy']
-gamma = 0.1
-step_size = 2
-# start_lr = 1000
+batch_size = args.batch_size
+num_epochs = args.epochs
+start_lr = args.lr
+optimizers = args.optimizers
+loss_functions = args.loss_functions
+gamma = args.gamma
+step_size = args.step_size
 # optimizers = ['sgd', 'adam', 'rmsprop']
 # loss_functions = ['cross_entropy', 'l1', 'nll', 'l2']
 
@@ -74,7 +91,7 @@ for cat in categories:
                                    cuda)
 
             best_model, hist_acc, hist_loss = model.train(cat, num_epochs)
-            if save:
+            if args.save:
                 print('Saving best model...')
                 model_filename = './modular_network/models/resnet50_{}_model_{}_{}.pth'.format(cat, optimizer, loss)
                 torch.save(model, model_filename)

@@ -17,10 +17,12 @@ sys.path.append(lib_path)
 ext_lib_path = os.path.abspath(os.path.join(__file__, '../../preprocessing'))
 sys.path.append(ext_lib_path)
 
-from inaturalist_dataset import INaturalistDataset
-from modular_net import ModularNetwork
+from preprocessing.inaturalist_dataset import INaturalistDataset
+from modular_network.modular_net import ModularNetwork
 
 parser = argparse.ArgumentParser(description='dl4cv_team50 Modular Network')
+parser.add_argument('--model', default=None, metavar='m', dest='model',
+                    help='path to the model to be loaded')
 parser.add_argument('--save', type=bool, default=True, metavar='s', dest='save',
                     help='whether to save the best model or not')
 parser.add_argument('--lr', type=float, default=1e-3, metavar='l', dest='lr',
@@ -40,7 +42,6 @@ parser.add_argument('--loss-functions', default=None, nargs='+', metavar='f', de
 args = parser.parse_args()
 
 cuda = torch.cuda.is_available()
-save = True
 
 torch.manual_seed(1)
 if cuda:
@@ -60,17 +61,11 @@ data_dir = './data_preprocessed/'
 
 batch_size = args.batch_size
 num_epochs = args.epochs
-# batch_size = 850
-# num_epochs = 8
-# start_lr = 1000
 # optimizers = ['sgd', 'adam', 'rmsprop']
 # loss_functions = ['cross_entropy', 'l1', 'nll', 'l2']
-# start_lr = 1e-1
 start_lr = args.lr
 step_size = args.step_size
 gamma = args.gamma
-# optimizers = ['adam', 'sgd']
-# loss_functions = ['cross_entropy']
 optimizers = args.optimizers
 loss_functions = args.loss_functions
 
@@ -92,12 +87,18 @@ for optimizer in optimizers:
     for loss in loss_functions:
         train_params = {'optimizer': optimizer, 'learning_rate': start_lr, 'gamma': gamma, 'step_size': step_size}
 
-        model = ModularNetwork({'train': inaturalist_train, 'val': inaturalist_val, 'test': None},
-                               {'train': train_loader, 'val': val_loader, 'test': None}, train_params, loss,
-                               cuda)
+        if args.model is None:
+            model = ModularNetwork({'train': inaturalist_train, 'val': inaturalist_val, 'test': None},
+                                   {'train': train_loader, 'val': val_loader, 'test': None}, train_params, loss,
+                                   cuda)
+        else:
+            print('Loading model from file...')
+            model = torch.load(args.model)
+            print(model)
+            print('Model loaded.')
 
         best_model, hist_acc, hist_loss = model.train('categories_net', num_epochs)
-        if save:
+        if args.save:
             print('Saving best model...')
             model_filename = './modular_network/models/resnet50_{}_model_{}_{}.pth'.format('supercategories',
                                                                                            optimizer, loss)
