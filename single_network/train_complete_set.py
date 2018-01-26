@@ -10,7 +10,7 @@ import copy
 
 # script parameters
 log_interval = 1
-output_categories = 5089
+output_categories = 667
 cuda = torch.cuda.is_available()
 
 

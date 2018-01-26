@@ -8,7 +8,8 @@ import json
 import torchvision.transforms as transforms
 from PIL import Image
 
-# source_root is the data set you want to expand. destination_root is where the newly made images end up. dst_annotations is where the new annotation file for the entire dataset (original images + new images) ends up 
+# source_root is the data set you want to expand. destination_root is where the newly made images end up.
+# dst_annotations is where the new annotation file for the entire dataset (original images + new images) ends up
 source_root = './data_preprocessed/'
 destination_root = './data_preprocessed/'
 dst_annotations = './annotations/augmented_train2017.json'
@@ -64,11 +65,10 @@ def augment_image(train_images, img_list, mult_index, category_id, aug_counter):
     return annotation_list, image_annotation_list, aug_counter
 
 
-
 if __name__ == '__main__':
 
     aug_counter = 700000
-	
+
     # load data sets
     train_set = json.load(open(src_annotations_train))
 
@@ -104,12 +104,14 @@ if __name__ == '__main__':
             new_ann, new_image_ann, aug_counter = augment_image(train_images, imgs_of_species, 4, species['id'], aug_counter)
         elif len(imgs_of_species) < threshholds[5]:
             new_ann, new_image_ann, aug_counter = augment_image(train_images, imgs_of_species, 5, species['id'], aug_counter)
+        else:
+            pass
 
         # append the new objects to the total list
-        total_new_annotations_list.append(new_ann)
+        total_new_annotations_list.extend(new_ann)
         # append the new objects to the total list
-        total_new_annotations_list.append(new_ann)
-        total_new_image_annotations_list.append(new_image_ann)
+        total_new_annotations_list.extend(new_ann)
+        total_new_image_annotations_list.extend(new_image_ann)
 
     # replace in the original file the new objects
     train_set['annotations'] = total_new_annotations_list
