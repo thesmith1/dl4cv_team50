@@ -131,7 +131,7 @@ def evaluate(model, loss, dataset_loader):
     loss_value /= len(dataset_loader.dataset)
 
     # final log
-    print('\nEvaluation results:\n'
+    print('Evaluation completed.\nEvaluation results:\n'
           'Average loss: {:.4f},\nTOP 1 Accuracy: {}/{} ({:.2f}%),\nTOP 5 Accuracy: {}/{} ({:.2f}%)\n'
           .format(loss_value,
                   top1_correct, len(dataset_loader.dataset), 100. * top1_correct / len(dataset_loader.dataset),
@@ -152,7 +152,7 @@ def save_model_statistics(output_filename, results_val, results_test=None):
               "final loss: %.2f, correct (top1): %d, correct (top5): %d, predicted: %d\n\n" % results_test, file=fp)
 
 
-def complete_train(parameters, loaders, output_categories):
+def complete_train_validation(parameters, loaders, output_categories):
 
     # unwrap parameters and set model up
     train_loader, val_loader, test_loader = loaders

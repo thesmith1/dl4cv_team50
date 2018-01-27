@@ -7,7 +7,7 @@ import torch.optim as optim
 lib_path = os.path.abspath(os.path.join(__file__, '../..'))
 sys.path.append(lib_path)
 # print(sys.path)
-from single_network.train_complete_set import complete_train
+from single_network.train_complete_set import complete_train_validation
 from preprocessing.inaturalist_dataset import INaturalistDataset
 
 # models
@@ -82,4 +82,4 @@ if __name__ == '__main__':
                 # train with combination of hyper-parameters
                 loaders = (train_loader, val_loader, test_loader)
                 print("\n\nTraining model " + parameters['output-filename'])
-                complete_train(parameters, loaders, output_categories)
+                complete_train_validation(parameters, loaders, output_categories)
