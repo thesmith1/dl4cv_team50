@@ -177,8 +177,7 @@ def complete_train(parameters, loaders, output_categories):
         results_test = evaluate(model, loss, test_loader)
 
     print("Saving model...")
-    model_dict = copy.copy(model.state_dict())
-    torch.save(model_dict, "./single_network/models/" + parameters['output-filename'])
+    torch.save(model, "./single_network/models/" + parameters['output-filename'])
     save_model_statistics("./single_network/models/" + parameters['output-filename'][:-4] + ".txt",
                           results_val, results_test)
     print("done.")
