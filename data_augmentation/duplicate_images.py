@@ -10,12 +10,12 @@ from PIL import Image
 
 # source_root is the data set you want to expand. destination_root is where the newly made images end up.
 # dst_annotations is where the new annotation file for the entire dataset (original images + new images) ends up
-source_root = './data_preprocessed/'
-destination_root = './data_preprocessed/'
+source_root = './data_preprocessed_224/'
+destination_root = './data_preprocessed_224/'
 dst_annotations = './annotations/augmented_train2017.json'
 
 # This is the original annotation file for the training images you want to expand
-src_annotations_train = './annotations/protozoa_train2017.json'
+src_annotations_train = './annotations/reduced_dataset_train2017.json'
 
 threshholds = [20, 40, 60, 80, 100, 200]
 mult_values = [20, 10, 5, 4, 3, 2]
@@ -27,7 +27,6 @@ brightness_factor = 0.4
 '''
 inputs
 '''
-
 
 
 # augment the current set of images
@@ -91,7 +90,11 @@ if __name__ == '__main__':
 #            if ann['category_id'] == species['id']:
 #                imgs_of_species.append(ann['image_id'])
 
+
         # decide which amount of augmentation to do
+        did_augmentation = True
+        new_ann = None
+        new_image_ann = None
         if len(imgs_of_species) < threshholds[0]:
             new_ann, new_image_ann, aug_counter = augment_image(train_images, imgs_of_species, 0, species['id'], aug_counter)
         elif len(imgs_of_species) < threshholds[1]:
@@ -105,13 +108,12 @@ if __name__ == '__main__':
         elif len(imgs_of_species) < threshholds[5]:
             new_ann, new_image_ann, aug_counter = augment_image(train_images, imgs_of_species, 5, species['id'], aug_counter)
         else:
-            pass
+            did_augmentation = False
 
-        # append the new objects to the total list
-        total_new_annotations_list.extend(new_ann)
-        # append the new objects to the total list
-        total_new_annotations_list.extend(new_ann)
-        total_new_image_annotations_list.extend(new_image_ann)
+        if did_augmentation:
+            # append the new objects to the total list
+            total_new_annotations_list.extend(new_ann)
+            total_new_image_annotations_list.extend(new_image_ann)
 
     # replace in the original file the new objects
     train_set['annotations'] = total_new_annotations_list
