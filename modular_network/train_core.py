@@ -20,6 +20,7 @@ sys.path.append(ext_lib_path)
 from inaturalist_dataset import INaturalistDataset
 from modular_net import ModularNetwork
 
+
 parser = argparse.ArgumentParser(description='dl4cv_team50 Modular Network')
 parser.add_argument('--model', default=None, metavar='m', dest='model',
                     help='path to the model to be loaded')
@@ -39,6 +40,8 @@ parser.add_argument('--optimizers', default=None, nargs='+', metavar='o', dest='
                     help='list of optimizers to be used')
 parser.add_argument('--loss-functions', default=None, nargs='+', metavar='f', dest='loss_functions',
                     help='list of loss functions to be used')
+parser.add_argument('--weight-decay', type=int, default=0, metavar='w', dest='weight_decay',
+                    help='regularization factor')
 args = parser.parse_args()
 
 cuda = torch.cuda.is_available()
@@ -66,6 +69,7 @@ num_epochs = args.epochs
 start_lr = args.lr
 step_size = args.step_size
 gamma = args.gamma
+weight_decay = args.weight_decay
 optimizers = args.optimizers
 loss_functions = args.loss_functions
 
@@ -85,7 +89,8 @@ val_loader = torch.utils.data.DataLoader(inaturalist_val, batch_size=batch_size,
 
 for optimizer in optimizers:
     for loss in loss_functions:
-        train_params = {'optimizer': optimizer, 'learning_rate': start_lr, 'gamma': gamma, 'step_size': step_size}
+        train_params = {'optimizer': optimizer, 'learning_rate': start_lr, 'gamma': gamma, 'step_size': step_size,
+                        'weight_decay': weight_decay}
 
         if args.model is None:
             model = ModularNetwork({'train': inaturalist_train, 'val': inaturalist_val, 'test': None},

@@ -23,6 +23,7 @@ class ModularNetwork(object):
         self.datasets = datasets
         self.loaders = loaders
         self.optimizer = train_params['optimizer']
+        self.weight_decay = train_params['weight_decay']
         self.learning_rate = train_params['learning_rate']
         self.gamma = train_params['gamma']
         self.step_size = train_params['step_size']
@@ -67,6 +68,7 @@ class ModularNetwork(object):
         self.datasets = datasets
         self.loaders = loaders
         self.optimizer = train_params['optimizer']
+        self.weight_decay = train_params['weight_decay']
         self.learning_rate = train_params['learning_rate']
         self.gamma = train_params['gamma']
         self.step_size = train_params['step_size']
@@ -102,11 +104,14 @@ class ModularNetwork(object):
         print('Done.')
 
         if self.optimizer == 'sgd':
-            optimizer = optim.SGD(model.fc.parameters(), lr=self.learning_rate, momentum=0.9)
+            optimizer = optim.SGD(model.fc.parameters(), lr=self.learning_rate, momentum=0.9,
+                                  weight_decay=self.weight_decay)
         elif self.optimizer == 'adam':
-            optimizer = optim.Adam(model.fc.parameters(), lr=self.learning_rate)
+            optimizer = optim.Adam(model.fc.parameters(), lr=self.learning_rate,
+                                   weight_decay=self.weight_decay)
         elif self.optimizer == 'rmsprop':
-            optimizer = optim.RMSprop(model.fc.parameters(), lr=self.learning_rate, momentum=0.9)
+            optimizer = optim.RMSprop(model.fc.parameters(), lr=self.learning_rate, momentum=0.9,
+                                      weight_decay=self.weight_decay)
         else:
             raise AttributeError('Invalid choice of optimizer')
         scheduler = lr_scheduler.StepLR(optimizer, step_size=self.step_size, gamma=self.gamma)
@@ -166,7 +171,7 @@ class ModularNetwork(object):
                     # statistics
                     running_loss += loss.data[0] * inputs.size(0)
                     running_corrects += torch.sum(preds == labels.data)
-                    progress = batch_cnt * len(inputs)/len(self.datasets['phase']) * 100
+                    progress = batch_cnt * len(inputs)/len(self.datasets[phase]) * 100
                     print(progress, '%, Running loss is', running_loss)
 
                 epoch_loss = running_loss / len(self.datasets[phase])
