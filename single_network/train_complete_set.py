@@ -167,7 +167,7 @@ def complete_train(parameters, loaders, output_categories):
         one_epoch_train(model, optimizer, loss, train_loader, epoch_count)
 
     # evaluation on validation set
-    print("Evaluating model on validation set...")
+    print("\nEvaluating model on validation set...")
     results_val = evaluate(model, loss, val_loader)
 
     # evaluation on test set

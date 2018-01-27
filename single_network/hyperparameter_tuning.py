@@ -81,6 +81,6 @@ if __name__ == '__main__':
 
                 # train with combination of hyper-parameters
                 loaders = (train_loader, val_loader, test_loader)
-                print("Training model " + parameters['output-filename'])
+                print("\n\nTraining model " + parameters['output-filename'])
                 complete_train(parameters, loaders, output_categories)
                 print("done.")
