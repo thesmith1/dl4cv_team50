@@ -172,12 +172,13 @@ class ModularNetwork(object):
                     # statistics
                     running_loss += loss.data[0] * inputs.size(0)
                     if what is not 'categories_net' and phase == 'val':
-                        running_corrects += self.__top_five__(outputs, labels.data)
+                        _, corrects_top5 = self.correct_predictions(outputs, labels.data)
+                        running_corrects += corrects_top5
                     else:
                         running_corrects += torch.sum(preds == labels.data)
                     batch_cnt += len(inputs)
                     progress = batch_cnt/len(self.datasets[phase]) * 100
-                    print('%.2f' % progress, '%, Running loss is', running_loss, end='\r')
+                    print('%.2f' % progress, '%', 'Running loss is %.2f' % running_loss, end='\r')
 
                 epoch_loss = running_loss / len(self.datasets[phase])
                 epoch_acc = running_corrects / len(self.datasets[phase])
@@ -262,3 +263,18 @@ class ModularNetwork(object):
                 else:
                     probabilities[current_pred] = 0
         return corrects
+
+    def correct_predictions(self, output, target, topk=(1, 5)):
+        """Computes the precision@k for the specified values of k"""
+        maxk = max(topk)
+
+        _, pred = output.topk(maxk, 1, True, True)
+        pred = pred.t()
+        correct = pred.eq(target.view(1, -1).expand_as(pred))
+
+        res = []
+        for k in topk:
+            correct_k = correct[:k].view(-1).int().sum(0, keepdim=True)
+            res.append(correct_k.data.cpu().numpy().squeeze().tolist())
+
+        return res
