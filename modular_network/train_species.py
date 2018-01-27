@@ -126,6 +126,7 @@ for cat in categories:
                 else:
                     new_hist_loss = hist_loss
                     new_hist_acc = hist_acc
+
                 results = {'accuracy': hist_acc, 'loss': hist_loss}
                 results_filename = './modular_network/results/resnet50_{}_results_{}_{}.pkl'.format(cat, optimizer,
                                                                                                     loss)

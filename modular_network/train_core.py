@@ -20,6 +20,7 @@ sys.path.append(ext_lib_path)
 from inaturalist_dataset import INaturalistDataset
 from modular_net import ModularNetwork
 
+
 parser = argparse.ArgumentParser(description='dl4cv_team50 Modular Network')
 parser.add_argument('--model', default=None, metavar='m', dest='model',
                     help='path to the model to be loaded')
