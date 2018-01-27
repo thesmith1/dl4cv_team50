@@ -10,11 +10,10 @@ import copy
 
 # script parameters
 log_interval = 1
-output_categories = 667
 cuda = torch.cuda.is_available()
 
 
-def setup_model(parameters):
+def setup_model(parameters, output_categories=667):
     # unwrap parameters
     chosen_model = parameters['model']
     chosen_optimizer = parameters['optimizer']
@@ -154,13 +153,13 @@ def save_model_statistics(output_filename, results_val, results_test=None):
               "final loss: %.2f, correct (top1): %d, correct (top5): %d, predicted: %d\n\n" % results_test, file=fp)
 
 
-def complete_train(parameters, loaders):
+def complete_train(parameters, loaders, output_categories):
 
-    # set up model and unwrap parameters
-    model, optimizer = setup_model(parameters)
+    # unwrap parameters and set model up
+    train_loader, val_loader, test_loader = loaders
     num_epochs = parameters['num-epochs']
     loss = parameters['loss']()
-    train_loader, val_loader, test_loader = loaders
+    model, optimizer = setup_model(parameters, output_categories)
 
     # training
     print("Starting training (%d epoch%s)" % (num_epochs, "s" if num_epochs != 1 else ""))
@@ -172,8 +171,10 @@ def complete_train(parameters, loaders):
     results_val = evaluate(model, loss, val_loader)
 
     # evaluation on test set
-    print("Evaluating model on test set...")
-    results_test = evaluate(model, loss, test_loader)
+    results_test = None
+    if test_loader is not None:
+        print("Evaluating model on test set...")
+        results_test = evaluate(model, loss, test_loader)
 
     print("Saving model...")
     model_dict = copy.copy(model.state_dict())

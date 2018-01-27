@@ -44,13 +44,16 @@ class INaturalistDataset(data.Dataset):
         if modular_network_remap:
             # produce single category remappers, stored in a dict
             self.category_remappers = dict()
+            self.total_label_count = 0
             for supercategory in all_supercategories:
                 intra_category_ids = {cat['id'] for cat in all_categories.values() if
                                       cat['supercategory'] == supercategory}
+                self.total_label_count += len(intra_category_ids)
                 single_category_remapper = LabelRemapper(intra_category_ids)
                 self.category_remappers[supercategory] = single_category_remapper
         else:
             all_category_ids = {cat['id'] for cat in all_categories.values()}
+            self.total_label_count = len(all_category_ids)
             self.category_remapper = LabelRemapper(all_category_ids)
 
     def __getitem__(self, index):
