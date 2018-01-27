@@ -6,7 +6,6 @@ script for training a model on the complete dataset
 import torch.nn as nn
 import torch.utils.data
 from torch.autograd import Variable
-import copy
 
 # script parameters
 log_interval = 1
