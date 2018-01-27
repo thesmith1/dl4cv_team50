@@ -11,7 +11,7 @@ sys.path.append(lib_path)
 # print(sys.path)
 
 
-models_base_folder = './annotations/models/'
+models_base_folder = './single_network/models/'
 pth_filename = 'model=resnet50_lr=0.001_reg=0_batch-size=16_num-epochs=1_optimizer=Adam_loss=CrossEntropyLoss.pth'
 
 
