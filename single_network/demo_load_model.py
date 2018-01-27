@@ -17,7 +17,7 @@ from single_network.train_complete_set import evaluate
 # inputs
 models_base_folder = './single_network/models/'
 pth_filename = 'reg=0.0001_optimizer=Adam_num-epochs=1_loss=CrossEntropyLoss_model=resnet50_lr=0.0005_batch-size=800.pth'
-test_annotations = './annotations/reduced_dataset.json'
+test_annotations = './annotations/reduced_dataset_test2017.json'
 test_dir = lambda input_size: './data_preprocessed_{}'.format(input_size)
 test_batch_size = 100
 applied_transformations = transforms.Compose([transforms.ToTensor()])
