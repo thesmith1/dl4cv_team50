@@ -18,7 +18,7 @@ inputs
 '''
 
 # input paths
-src_annotations_train = './annotations/train2017_new.json'
+src_annotations_train = './annotations/augmented_train2017.json'
 src_annotations_val = './annotations/val2017.json'
 mode = SPECIFIC_SUPERCATEGORY
 
@@ -33,10 +33,10 @@ if mode == SPECIFIC_SPECIES:
 
 elif mode == SPECIFIC_SUPERCATEGORY:
 
-    supercategory_to_be_kept = 'Reptilia'
+    supercategory_to_be_kept = 'Amphibia'
 
-    dst_annotations_train = './annotations/modular_network/{}/train2017_min.json'.format(supercategory_to_be_kept)
-    dst_annotations_val = './annotations/modular_network/{}/val2017_min.json'.format(supercategory_to_be_kept)
+    dst_annotations_train = './annotations/modular_network/{}/augmented_train2017.json'.format(supercategory_to_be_kept)
+    # dst_annotations_val = './annotations/modular_network/{}/val2017_min.json'.format(supercategory_to_be_kept)
 
 elif mode == SET_OF_SUPERCATEGORIES:
     supercategories_to_be_kept = ['Reptilia', 'Mammalia', 'Animalia', 'Amphibia']
@@ -71,7 +71,7 @@ if __name__ == '__main__':
 
     # obtain all annotations
     train_annotations = train_set['annotations']
-    val_annotations = val_set['annotations']
+    # val_annotations = val_set['annotations']
 
     # transform species to be kept to indexes
     subset_categories_indexes = [cat['id'] for cat in train_set['categories'] if cat['name'] in species_to_be_kept]
@@ -80,12 +80,12 @@ if __name__ == '__main__':
     # obtain image ids for the images the required categories
     filtered_image_ids_train = [ann['image_id'] for ann in train_annotations if
                                 ann['category_id'] in subset_categories_indexes]
-    filtered_image_ids_val = [ann['image_id'] for ann in val_annotations if
-                              ann['category_id'] in subset_categories_indexes]
+    # filtered_image_ids_val = [ann['image_id'] for ann in val_annotations if
+    #                           ann['category_id'] in subset_categories_indexes]
 
     # obtain images on the required categories (i.e. id in filtered image ids)
     filtered_imgs_train = [img for img in train_set['images'] if img['id'] in filtered_image_ids_train]
-    filtered_imgs_val = [img for img in val_set['images'] if img['id'] in filtered_image_ids_val]
+    # filtered_imgs_val = [img for img in val_set['images'] if img['id'] in filtered_image_ids_val]
 
     # keep only annotations of the required categories (i.e. id in filtered image ids)
     new_ann_train = [ann for ann in train_set['annotations'] if
@@ -94,25 +94,25 @@ if __name__ == '__main__':
 
     # assign new images
     train_set['images'] = filtered_imgs_train
-    val_set['images'] = filtered_imgs_val
+    # val_set['images'] = filtered_imgs_val
     train_set['annotations'] = new_ann_train
-    val_set['annotations'] = new_ann_val
+    # val_set['annotations'] = new_ann_val
 
     # assign new categories
     present_cat_ids_train = {ann['category_id'] for ann in train_set['annotations']}
-    present_cat_ids_val = {ann['category_id'] for ann in val_set['annotations']}
+    # present_cat_ids_val = {ann['category_id'] for ann in val_set['annotations']}
     new_cat_train = [cat for cat in train_set['categories'] if cat['id'] in subset_categories_indexes]
-    new_cat_val = [cat for cat in val_set['categories'] if cat['id'] in subset_categories_indexes]
+    # new_cat_val = [cat for cat in val_set['categories'] if cat['id'] in subset_categories_indexes]
 
     train_set['categories'] = new_cat_train
-    val_set['categories'] = new_cat_val
+    # val_set['categories'] = new_cat_val
 
     print(train_set['categories'])
 
     # save
     with open(dst_annotations_train, 'w') as train_file:
         json.dump(train_set, train_file)
-    with open(dst_annotations_val, 'w') as val_file:
-        json.dump(val_set, val_file)
+    # with open(dst_annotations_val, 'w') as val_file:
+    #     json.dump(val_set, val_file)
 
     print("saved new files.")

@@ -16,7 +16,7 @@ from single_network.train_complete_set import evaluate
 
 # inputs
 models_base_folder = './single_network/models/'
-pth_filename = 'model=resnet50_lr=0.001_reg=0_batch-size=16_num-epochs=1_optimizer=Adam_loss=CrossEntropyLoss.pth'
+pth_filename = 'reg=0.0001_optimizer=Adam_num-epochs=1_loss=CrossEntropyLoss_model=resnet50_lr=0.0005_batch-size=800.pth'
 test_annotations = './annotations/reduced_dataset.json'
 test_dir = lambda input_size: './data_preprocessed_{}'.format(input_size)
 test_batch_size = 100
@@ -39,7 +39,7 @@ def load_model(filename):
         else:
             model_parameters[parameter_name] = parameter_value
 
-    return torch.load(open(models_base_folder + filename, "r")), model_parameters
+    return torch.load(open(models_base_folder + filename, "rb")), model_parameters
 
 
 if __name__ == '__main__':

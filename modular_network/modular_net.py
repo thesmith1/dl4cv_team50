@@ -171,8 +171,12 @@ class ModularNetwork(object):
 
                     # statistics
                     running_loss += loss.data[0] * inputs.size(0)
-                    running_corrects += torch.sum(preds == labels.data)
-                    progress = batch_cnt * len(inputs)/len(self.datasets[phase]) * 100
+                    if what is not 'categories_net' and phase == 'val':
+                        running_corrects += self.__top_five__(outputs, labels.data)
+                    else:
+                        running_corrects += torch.sum(preds == labels.data)
+                    batch_cnt += len(inputs)
+                    progress = batch_cnt/len(self.datasets[phase]) * 100
                     print(progress, '%, Running loss is', running_loss, end='\r')
 
                 epoch_loss = running_loss / len(self.datasets[phase])
@@ -246,3 +250,15 @@ class ModularNetwork(object):
             self.categories_model_fc = model
         else:
             self.mini_net_model[what] = model
+
+    def __top_five__(self, outputs, labels):
+        corrects = 0
+        probabilities = torch.nn.functional.softmax(outputs, dim=0)
+        for index, el in enumerate(probabilities):
+            for cnt in range(5):
+                current_pred = np.argmax(el)
+                if current_pred == labels[index]:
+                    corrects += 1
+                else:
+                    probabilities[current_pred] = 0
+        return corrects
