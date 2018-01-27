@@ -75,8 +75,8 @@ step_size = args.step_size
 for cat in categories:
     print('Start training of', cat)
     annotations_dir = './annotations/modular_network/{}/'.format(cat)
-    train_annotations = '{}train2017_min.json'.format(annotations_dir, cat)
-    val_annotations = '{}val2017_min.json'.format(annotations_dir, cat)
+    train_annotations = '{}augmented_train2017.json'.format(annotations_dir)
+    val_annotations = '{}val2017_min.json'.format(annotations_dir)
 
     transf = transforms.ToTensor()
 
