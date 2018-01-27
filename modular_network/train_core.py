@@ -109,15 +109,20 @@ for optimizer in optimizers:
             torch.save(model, model_filename)
             print('Best model saved.')
             print('Saving results...')
-            subfolders = args.model.split('.')[1].split('/')
-            old_results_filename = './' + subfolders[1] + '/results/' + subfolders[3] + '.pkl'
-            old_results = pickle.load(open(old_results_filename, 'rb'))
-            old_hist_acc = old_results['accuracy']
-            old_hist_loss = old_results['loss']
-            new_hist_acc = {'train': old_hist_acc['train'] + hist_acc['train'],
-                            'val': old_hist_acc['val'] + hist_acc['val']}
-            new_hist_loss = {'train': old_hist_loss['train'] + hist_loss['train'],
-                            'val': old_hist_loss['val'] + hist_loss['val']}
+            if args.model is not None:
+                subfolders = args.model.split('.')[1].split('/')
+                piece = 'resnet50_supercategories_results_{}_{}.pkl'.format(optimizer, loss)
+                old_results_filename = './' + subfolders[1] + '/results/' + piece
+                old_results = pickle.load(open(old_results_filename, 'rb'))
+                old_hist_acc = old_results['accuracy']
+                old_hist_loss = old_results['loss']
+                new_hist_acc = {'train': old_hist_acc['train'] + hist_acc['train'],
+                                'val': old_hist_acc['val'] + hist_acc['val']}
+                new_hist_loss = {'train': old_hist_loss['train'] + hist_loss['train'],
+                                'val': old_hist_loss['val'] + hist_loss['val']}
+            else:
+                new_hist_loss = hist_loss
+                new_hist_acc = hist_acc
             results = {'accuracy': new_hist_acc, 'loss': new_hist_loss}
             results_filename = './modular_network/results/resnet50_{}_results_{}_{}.pkl'.format('supercategories',
                                                                                                 optimizer, loss)
