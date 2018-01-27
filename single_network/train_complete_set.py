@@ -46,7 +46,7 @@ def correct_predictions(output, target, topk=(1, 5)):
     res = []
     for k in topk:
         correct_k = correct[:k].view(-1).int().sum(0, keepdim=True)
-        res.append(correct_k.data.numpy().squeeze().tolist())
+        res.append(correct_k.data.cpu().numpy().squeeze().tolist())
     return res
 
 
