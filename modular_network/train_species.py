@@ -7,6 +7,7 @@ at the end of the process, it will save the results and the best models
 import os
 import sys
 import pickle
+import argparse
 
 import torch
 from torchvision import transforms
@@ -20,6 +21,8 @@ from inaturalist_dataset import INaturalistDataset
 from modular_net import ModularNetwork
 
 parser = argparse.ArgumentParser(description='dl4cv_team50 Modular Network')
+parser.add_argument('--model', default=None, metavar='m', dest='model',
+                    help='path to the model to be loaded')
 parser.add_argument('--save', type=bool, default=True, metavar='s', dest='save',
                     help='whether to save the best model or not')
 parser.add_argument('--lr', type=float, default=1e-3, metavar='l', dest='lr',
@@ -36,6 +39,8 @@ parser.add_argument('--optimizers', default=None, nargs='+', metavar='o', dest='
                     help='list of optimizers to be used')
 parser.add_argument('--loss-functions', default=None, nargs='+', metavar='f', dest='loss_functions',
                     help='list of loss functions to be used')
+parser.add_argument('--weight-decay', type=int, default=0, metavar='w', dest='weight_decay',
+                    help='regularization factor')
 args = parser.parse_args()
 
 cuda = torch.cuda.is_available()
@@ -62,6 +67,7 @@ start_lr = args.lr
 optimizers = args.optimizers
 loss_functions = args.loss_functions
 gamma = args.gamma
+weight_decay = args.weight_decay
 step_size = args.step_size
 # optimizers = ['sgd', 'adam', 'rmsprop']
 # loss_functions = ['cross_entropy', 'l1', 'nll', 'l2']
@@ -84,11 +90,20 @@ for cat in categories:
 
     for optimizer in optimizers:
         for loss in loss_functions:
-            train_params = {'optimizer': optimizer, 'learning_rate': start_lr, 'gamma': gamma, 'step_size': step_size}
+            train_params = {'optimizer': optimizer, 'learning_rate': start_lr, 'gamma': gamma, 'step_size': step_size,
+                            'weight_decay': weight_decay}
 
-            model = ModularNetwork({'train': inaturalist_train, 'val': inaturalist_val, 'test': None},
-                                   {'train': train_loader, 'val': val_loader, 'test': None}, train_params, loss,
-                                   cuda)
+            if args.model is None:
+                model = ModularNetwork({'train': inaturalist_train, 'val': inaturalist_val, 'test': None},
+                                       {'train': train_loader, 'val': val_loader, 'test': None}, train_params, loss,
+                                       cuda)
+            else:
+                print('Loading model from file...')
+                model = torch.load(args.model)
+                model.set_parameters({'train': inaturalist_train, 'val': inaturalist_val, 'test': None},
+                                     {'train': train_loader, 'val': val_loader, 'test': None}, train_params, loss,
+                                     cuda)
+                print('Model loaded.')
 
             best_model, hist_acc, hist_loss = model.train(cat, num_epochs)
             if args.save:
@@ -97,6 +112,20 @@ for cat in categories:
                 torch.save(model, model_filename)
                 print('Best model saved.')
                 print('Saving results...')
+                if args.model is not None:
+                    subfolders = args.model.split('.')[1].split('/')
+                    piece = 'resnet50_{}_results_{}_{}.pkl'.format(cat, optimizer, loss)
+                    old_results_filename = './' + subfolders[1] + '/results/' + piece
+                    old_results = pickle.load(open(old_results_filename, 'rb'))
+                    old_hist_acc = old_results['accuracy']
+                    old_hist_loss = old_results['loss']
+                    new_hist_acc = {'train': old_hist_acc['train'] + hist_acc['train'],
+                                    'val': old_hist_acc['val'] + hist_acc['val']}
+                    new_hist_loss = {'train': old_hist_loss['train'] + hist_loss['train'],
+                                     'val': old_hist_loss['val'] + hist_loss['val']}
+                else:
+                    new_hist_loss = hist_loss
+                    new_hist_acc = hist_acc
                 results = {'accuracy': hist_acc, 'loss': hist_loss}
                 results_filename = './modular_network/results/resnet50_{}_results_{}_{}.pkl'.format(cat, optimizer,
                                                                                                     loss)
