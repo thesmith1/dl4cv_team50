@@ -2,7 +2,7 @@
 """
 script for overfitting small dataset (see annotations/*_min.json)
 """
-import sys, os
+import sys, os, numpy
 lib_path = os.path.abspath(os.path.join(__file__, '../..'))
 sys.path.append(lib_path)
 
@@ -29,11 +29,11 @@ chosen_optimizer = optim.Adam
 chosen_model = models.resnet50
 
 # set directories
-data_dir = './data_preprocessed/'
+data_dir = './data_preprocessed_299/'
 annotations_dir = './annotations/'
-train_annotations = '{}train2017_new.json'.format(annotations_dir)
-val_annotations = '{}val2017.json'.format(annotations_dir)
-test_annotations = '{}test2017_new.json'.format(annotations_dir)
+train_annotations = '{}train2017_min.json'.format(annotations_dir)
+val_annotations = '{}val2017min.json'.format(annotations_dir)
+#test_annotations = '{}test2017_new.json'.format(annotations_dir)
 applied_transformations = transforms.Compose([transforms.ToTensor()])
 
 
@@ -137,8 +137,19 @@ if __name__ == '__main__':
 
     # training
     print("\n\nLoading training set...")
-    inaturalist_train = INaturalistDataset(data_dir, train_annotations, transform=applied_transformations,
+    inaturalist_train = INaturalistDataset(data_dir, train_annotations, transform=None,
                                            modular_network_remap=False)
+    labels = numpy.zeros(len(inaturalist_train))    
+    stacked = numpy.zeros((len(inaturalist_train),268203))
+    for i, photo_data in enumerate(inaturalist_train):
+        #print(numpy.shape(numpy.array(photo_data[0]).flatten()))
+        stacked[i] = numpy.array(photo_data[0]).flatten()
+        labels[i] = photo_data[1][1]
+        #for component in (photo_data[1]):
+        #    print("Class: ", component)
+    print(numpy.shape(stacked))
+    print(stacked[0])
+    print("Labels: ", labels)
     """
     train_loader = torch.utils.data.DataLoader(inaturalist_train, batch_size=batch_size, shuffle=True)
     print("Starting training (%d epochs)" % epochs)
