@@ -13,16 +13,15 @@ sys.path.append(lib_path)
 
 models_base_folder = './annotations/models/'
 pth_filename = 'model=resnet50_lr=0.001_reg=0_batch-size=16_num-epochs=1_optimizer=Adam_loss=CrossEntropyLoss.pth'
-complete_pth = models_base_folder + pth_filename
 
 
-def load_model(pth_file):
+def load_model(filename):
 
     # accepted parameters
     accepted_parameters = ['model', 'lr', 'reg', 'batch-size', 'num-epches', 'optimizer', 'loss']
 
     # split parameters
-    parameter_couples = pth_file[:-4].split("_")
+    parameter_couples = filename[:-4].split("_")
 
     model_parameters = dict()
     for parameter_couple in parameter_couples:
@@ -32,11 +31,11 @@ def load_model(pth_file):
         else:
             model_parameters[parameter_name] = parameter_value
 
-    return torch.load(open(pth_file, "r")), model_parameters
+    return torch.load(open(models_base_folder + filename, "r")), model_parameters
 
 
 if __name__ == '__main__':
-    model, parameters = load_model(complete_pth)
+    model, parameters = load_model(pth_filename)
     model.eval()
 
     print(model.__name__)
