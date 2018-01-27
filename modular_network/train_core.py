@@ -93,6 +93,7 @@ for optimizer in optimizers:
                         'weight_decay': weight_decay}
 
         if args.model is None:
+            pass
             model = ModularNetwork({'train': inaturalist_train, 'val': inaturalist_val, 'test': None},
                                    {'train': train_loader, 'val': val_loader, 'test': None}, train_params, loss,
                                    cuda)
@@ -114,8 +115,8 @@ for optimizer in optimizers:
             print('Saving results...')
             if args.model is not None:
                 subfolders = args.model.split('.')[1].split('/')
-                piece = 'resnet50_supercategories_results_{}_{}.pkl'.format(optimizer, loss)
-                old_results_filename = './' + subfolders[1] + '/results/' + piece
+                old_results_filename = './' + subfolders[1] + '/results/' + subfolders[3] + '.pkl'
+                print(old_results_filename)
                 old_results = pickle.load(open(old_results_filename, 'rb'))
                 old_hist_acc = old_results['accuracy']
                 old_hist_loss = old_results['loss']
