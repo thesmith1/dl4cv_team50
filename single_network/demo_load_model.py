@@ -18,7 +18,7 @@ pth_filename = 'model=resnet50_lr=0.001_reg=0_batch-size=16_num-epochs=1_optimiz
 def load_model(filename):
 
     # accepted parameters
-    accepted_parameters = ['model', 'lr', 'reg', 'batch-size', 'num-epches', 'optimizer', 'loss']
+    accepted_parameters = ['model', 'lr', 'reg', 'batch-size', 'num-epochs', 'optimizer', 'loss']
 
     # split parameters
     parameter_couples = filename[:-4].split("_")
