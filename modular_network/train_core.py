@@ -100,8 +100,6 @@ for optimizer in optimizers:
             print('Model loaded.')
 
         best_model, hist_acc, hist_loss = model.train('categories_net', num_epochs)
-        hist_acc = {'train': [], 'val': []}
-        hist_loss = {'train': [], 'val': []}
         if args.save:
             print('Saving best model...')
             model_filename = './modular_network/models/resnet50_{}_model_{}_{}.pth'.format('supercategories',
