@@ -99,7 +99,13 @@ for cat in categories:
                                        cuda)
             else:
                 print('Loading model from file...')
-                model = torch.load(args.model)
+                subfolders = args.model.split('/')
+                numbers = subfolders[3].split('model')
+                model_filename = '{}/{}/models/resnet50_{}_model{}'.format(subfolders[0],
+                                                                           subfolders[1],
+                                                                           cat,
+                                                                           numbers[1])
+                model = torch.load(model_filename)
                 model.set_parameters({'train': inaturalist_train, 'val': inaturalist_val, 'test': None},
                                      {'train': train_loader, 'val': val_loader, 'test': None}, train_params, loss,
                                      cuda)
