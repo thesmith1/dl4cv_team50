@@ -83,4 +83,3 @@ if __name__ == '__main__':
                 loaders = (train_loader, val_loader, test_loader)
                 print("\n\nTraining model " + parameters['output-filename'])
                 complete_train(parameters, loaders, output_categories)
-                print("done.")
