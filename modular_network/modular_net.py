@@ -171,8 +171,12 @@ class ModularNetwork(object):
 
                     # statistics
                     running_loss += loss.data[0] * inputs.size(0)
+                    # if what is not 'categories_net':
+                    #     pass
+                    # else:
                     running_corrects += torch.sum(preds == labels.data)
-                    progress = batch_cnt * len(inputs)/len(self.datasets[phase]) * 100
+                    batch_cnt += len(inputs)
+                    progress = batch_cnt/len(self.datasets[phase]) * 100
                     print(progress, '%, Running loss is', running_loss, end='\r')
 
                 epoch_loss = running_loss / len(self.datasets[phase])
