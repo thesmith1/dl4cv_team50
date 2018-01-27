@@ -86,7 +86,6 @@ class ModularNetwork(object):
 
     def train(self, what, num_epochs):
         since = time.time()
-        batch_cnt = 0
 
         # Build the network to be trained
         print('Building the model to be trained...')
@@ -124,9 +123,11 @@ class ModularNetwork(object):
         hist_loss = {'train': [], 'val': []}
 
         print('Starting training...')
+        print('Size of the dataset is', len(self.datasets['train']))
         for epoch in range(num_epochs):
             print('Epoch {}/{}'.format(epoch, num_epochs - 1))
             print('-' * 10)
+            batch_cnt = 0
 
             for phase in ['train', 'val']:
                 if phase == 'train':
@@ -172,7 +173,7 @@ class ModularNetwork(object):
                     running_loss += loss.data[0] * inputs.size(0)
                     running_corrects += torch.sum(preds == labels.data)
                     progress = batch_cnt * len(inputs)/len(self.datasets[phase]) * 100
-                    print(progress, '%, Running loss is', running_loss)
+                    print(progress, '%, Running loss is', running_loss, end='\r')
 
                 epoch_loss = running_loss / len(self.datasets[phase])
                 epoch_acc = running_corrects / len(self.datasets[phase])

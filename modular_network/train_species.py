@@ -114,8 +114,7 @@ for cat in categories:
                 print('Saving results...')
                 if args.model is not None:
                     subfolders = args.model.split('.')[1].split('/')
-                    piece = 'resnet50_{}_results_{}_{}.pkl'.format(cat, optimizer, loss)
-                    old_results_filename = './' + subfolders[1] + '/results/' + piece
+                    old_results_filename = './' + subfolders[1] + '/results/' + subfolders[3] + '.pkl'
                     old_results = pickle.load(open(old_results_filename, 'rb'))
                     old_hist_acc = old_results['accuracy']
                     old_hist_loss = old_results['loss']
