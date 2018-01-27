@@ -142,7 +142,6 @@ def evaluate(model, loss, dataset_loader):
 
 def save_model_statistics(output_filename, results_val, results_test=None):
 
-    print(output_filename)
     with open(output_filename, "w") as fp:
         print('Validation results\n'
               'final loss: %.2f, correct (top1): %d, correct (top5): %d, predicted: %d\n\n' % results_val, file=fp)
@@ -175,8 +174,9 @@ def complete_train_validation(parameters, loaders, output_categories):
         print("Evaluating model on test set...")
         results_test = evaluate(model, loss, test_loader)
 
-    print("Saving model...")
-    torch.save(model, "./single_network/models/" + parameters['output-filename'])
-    save_model_statistics("./single_network/models/" + parameters['output-filename'][:-4] + ".txt",
-                          results_val, results_test)
+    # saving
+    model_output_file = "./single_network/models/" + parameters['output-filename']
+    print("Saving model %s..." % model_output_file, end='')
+    torch.save(model, model_output_file)
+    save_model_statistics(model_output_file[:-4] + ".txt", results_val, results_test)
     print("done.")
