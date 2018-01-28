@@ -30,7 +30,7 @@ def setup_model(parameters, output_categories=667):
         model = model.cuda()
 
     # create optimizer
-    optimizer = chosen_optimizer(model.fc.parameters(), lr=lr)
+    optimizer = chosen_optimizer(model.fc.parameters(), lr=lr, weight_decay=parameters['reg'])
     return model, optimizer
 
 
