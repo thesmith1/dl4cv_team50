@@ -30,6 +30,7 @@ validation_during_training = True
 do_testing = True
 applied_transformations = transforms.Compose([transforms.ToTensor()])
 non_printable = ["model", "optimizer", "loss"]
+cuda = torch.cuda.is_available()
 
 
 def setup_vgg19(parameters, output_categories=667):
@@ -42,7 +43,7 @@ def setup_vgg19(parameters, output_categories=667):
         param.requires_grad = True
 
     # move model to GPU
-    if train_script.cuda:
+    if cuda:
         model = model.cuda()
 
     # create optimizer
