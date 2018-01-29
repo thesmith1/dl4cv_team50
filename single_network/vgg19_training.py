@@ -52,7 +52,7 @@ def setup_vgg19(parameters, output_categories=667):
         model = model.cuda()
 
     # create optimizer
-    adam = optim.Adam(model.fc.parameters(), lr=parameters['lr'], weight_decay=parameters['reg'])
+    adam = optim.Adam(model.classifier.parameters(), lr=parameters['lr'], weight_decay=parameters['reg'])
     return model, adam
 
 
@@ -98,7 +98,6 @@ if __name__ == '__main__':
         "_".join([str(key) + "=" + (parameter.__name__ if key in non_printable else str(parameter))
                   for key, parameter in parameters.items()]))
 
-    loaders = (train_loader, val_loader, test_loader)
     print("\n\nTraining model " + parameters['output-filename'])
     # training
     print("Starting training (%d epoch%s)" % (num_epochs, "s" if num_epochs != 1 else ""))
