@@ -100,4 +100,26 @@ if __name__ == '__main__':
 
     loaders = (train_loader, val_loader, test_loader)
     print("\n\nTraining model " + parameters['output-filename'])
-    train_script.complete_train_validation(parameters, loaders, output_categories, validation_during_training)
+    # training
+    print("Starting training (%d epoch%s)" % (num_epochs, "s" if num_epochs != 1 else ""))
+    for epoch_count in range(1, num_epochs + 1):
+        train_script.one_epoch_train(model, adam, loss, train_loader, epoch_count)
+        if validation_during_training:
+            train_script.evaluate(model, loss, val_loader)
+
+    # evaluation on validation set
+    print("\nEvaluating model on validation set...")
+    results_val = train_script.evaluate(model, loss, val_loader)
+
+    # evaluation on test set
+    results_test = None
+    if test_loader is not None:
+        print("Evaluating model on test set...")
+        results_test = train_script.evaluate(model, loss, test_loader)
+
+    # saving
+    model_output_file = "./single_network/models/" + parameters['output-filename']
+    print("Saving model %s..." % model_output_file, end='')
+    torch.save(model, model_output_file)
+    train_script.save_model_statistics(model_output_file[:-4] + ".txt", results_val, results_test)
+    print("done.")
