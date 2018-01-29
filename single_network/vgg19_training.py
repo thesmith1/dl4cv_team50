@@ -210,6 +210,7 @@ if __name__ == '__main__':
 
     print("\n\nSetting up model " + parameters['output-filename'])
     model, adam = setup_vgg19(params)
+    loss = loss()
 
     # training
     print("Starting training (%d epoch%s)" % (num_epochs, "s" if num_epochs != 1 else ""))
