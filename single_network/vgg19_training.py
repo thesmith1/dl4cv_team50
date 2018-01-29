@@ -37,8 +37,9 @@ def setup_vgg19(parameters, output_categories=667):
     # get pre-trained model, change classifier layers
     model = models.vgg19(pretrained=True)
     for param in model.parameters():
-        if param not in model.classifier.parameters():
-            param.requires_grad = False
+        param.requires_grad = False
+    for param in model.classifier.parameters():
+        param.requires_grad = True
 
     # move model to GPU
     if train_script.cuda:
