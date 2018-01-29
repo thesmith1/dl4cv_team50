@@ -24,7 +24,7 @@ test_batch_size = 100
 applied_transformations = transforms.Compose([transforms.ToTensor()])
 
 
-def load_model(filename):
+def parse_model_parameters(filename):
 
     # accepted parameters
     accepted_parameters = ['model', 'lr', 'reg', 'batch-size', 'num-epochs', 'optimizer', 'loss']
@@ -40,6 +40,11 @@ def load_model(filename):
         else:
             model_parameters[parameter_name] = parameter_value
 
+    return model_parameters
+
+
+def load_model(filename):
+    model_parameters = parse_model_parameters(filename)
     return torch.load(open(models_base_folder + filename, "rb")), model_parameters
 
 
