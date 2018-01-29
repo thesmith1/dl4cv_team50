@@ -1,2 +1,7 @@
 data
 data2
+data_preprocessed
+nohup.out
+*.pyc
+annotations/train2017.json
+annotations/val2017.json
