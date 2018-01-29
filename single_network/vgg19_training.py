@@ -31,21 +31,14 @@ do_testing = True
 applied_transformations = transforms.Compose([transforms.ToTensor()])
 non_printable = ["model", "optimizer", "loss"]
 
+
 def setup_vgg19(parameters, output_categories=667):
 
-    # get pre-trained model, change FC layer
+    # get pre-trained model, change classifier layers
     model = models.vgg19(pretrained=True)
-    parameter_list = model.parameters()
     for param in model.parameters():
-        param.requires_grad = False
-    model.classifier = nn.Sequential(
-            nn.Linear(512 * 7 * 7, 4096),
-            nn.ReLU(True),
-            nn.Dropout(),
-            nn.Linear(4096, 4096),
-            nn.ReLU(True),
-            nn.Dropout(),
-            nn.Linear(4096, output_categories))
+        if param not in model.classifier.parameters():
+            param.requires_grad = False
 
     # move model to GPU
     if train_script.cuda:
@@ -58,9 +51,8 @@ def setup_vgg19(parameters, output_categories=667):
 
 if __name__ == '__main__':
 
-    # setup
+    # init
     params = {'lr':learning_rate, 'reg':regularization_strength}
-    model, adam = setup_vgg19(params)
 
     # loading
     print("Loading training set...")
@@ -87,18 +79,20 @@ if __name__ == '__main__':
 
     # create parameter set
     parameters = dict()
-    parameters['model'] = model
+    parameters['model'] = models.vgg19
     parameters['lr'] = learning_rate
     parameters['reg'] = regularization_strength
     parameters['batch-size'] = batch_size
     parameters['num-epochs'] = num_epochs
-    parameters['optimizer'] = adam
+    parameters['optimizer'] = optim.Adam
     parameters['loss'] = loss
     parameters['output-filename'] = "{0}.pth".format(
         "_".join([str(key) + "=" + (parameter.__name__ if key in non_printable else str(parameter))
                   for key, parameter in parameters.items()]))
 
-    print("\n\nTraining model " + parameters['output-filename'])
+    print("\n\nSetting up model " + parameters['output-filename'])
+    model, adam = setup_vgg19(params)
+
     # training
     print("Starting training (%d epoch%s)" % (num_epochs, "s" if num_epochs != 1 else ""))
     for epoch_count in range(1, num_epochs + 1):
