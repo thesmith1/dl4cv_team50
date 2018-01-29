@@ -26,6 +26,7 @@ num_epochs = 10
 loss = torch.nn.CrossEntropyLoss
 
 # other parameters
+validation_during_training = True
 do_testing = True
 applied_transformations = transforms.Compose([transforms.ToTensor()])
 non_printable = ["model", "optimizer", "loss"]
@@ -97,7 +98,6 @@ if __name__ == '__main__':
         "_".join([str(key) + "=" + (parameter.__name__ if key in non_printable else str(parameter))
                   for key, parameter in parameters.items()]))
 
-    # train with combination of hyper-parameters
     loaders = (train_loader, val_loader, test_loader)
     print("\n\nTraining model " + parameters['output-filename'])
-    train_script.complete_train_validation(parameters, loaders, output_categories)
+    train_script.complete_train_validation(parameters, loaders, output_categories, validation_during_training)

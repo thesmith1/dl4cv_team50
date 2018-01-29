@@ -151,7 +151,7 @@ def save_model_statistics(output_filename, results_val, results_test=None):
               "final loss: %.2f, correct (top1): %d, correct (top5): %d, predicted: %d\n\n" % results_test, file=fp)
 
 
-def complete_train_validation(parameters, loaders, output_categories):
+def complete_train_validation(parameters, loaders, output_categories, validation_during_training=False):
 
     # unwrap parameters and set model up
     train_loader, val_loader, test_loader = loaders
@@ -163,6 +163,8 @@ def complete_train_validation(parameters, loaders, output_categories):
     print("Starting training (%d epoch%s)" % (num_epochs, "s" if num_epochs != 1 else ""))
     for epoch_count in range(1, num_epochs + 1):
         one_epoch_train(model, optimizer, loss, train_loader, epoch_count)
+        if validation_during_training:
+            evaluate(model, loss, val_loader)
 
     # evaluation on validation set
     print("\nEvaluating model on validation set...")
