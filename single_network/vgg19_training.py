@@ -20,7 +20,7 @@ test_annotations = '{}reduced_dataset_test2017.json'.format(annotations_dir)
 # hyper-parameters
 learning_rate = 1e-3
 regularization_strength = 0
-batch_size = 800
+batch_size = 128
 num_epochs = 10
 loss = torch.nn.CrossEntropyLoss
 
