@@ -6,11 +6,12 @@ script for training a model on the complete dataset
 import torch.nn as nn
 import torch.utils.data
 from torch.autograd import Variable
+from math import sqrt
 
 # script parameters
 log_interval = 1
 cuda = torch.cuda.is_available()
-intermediate_fc_layer_size = 1000
+
 
 
 def setup_model(parameters, output_categories=667, num_fc_layers=1):
@@ -29,7 +30,8 @@ def setup_model(parameters, output_categories=667, num_fc_layers=1):
     # print("fc_in_features:", fc_in_feautures)
     if num_fc_layers == 1:
         model.fc = nn.Linear(fc_in_features, output_categories)
-    elif num_fc_layers > 1:
+    elif num_fc_layers == 2:
+        intermediate_fc_layer_size = int(sqrt(fc_in_features*output_categories))
         model.fc = nn.Sequential(nn.Linear(fc_in_features, intermediate_fc_layer_size),
                                  nn.ReLU(),
                                  nn.Linear(intermediate_fc_layer_size, output_categories))
