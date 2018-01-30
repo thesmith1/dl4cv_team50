@@ -29,7 +29,7 @@ class ModularNetwork(object):
         self.gamma = None
         self.step_size = None
         self.loss_function = None
-        self.cuda = False
+        self.is_cuda = False
         self.set_parameters(datasets, loaders, train_params, loss_function, cuda_avail)
         # The big network which classifies categories
         print('Loading the network for categories...')
@@ -65,7 +65,7 @@ class ModularNetwork(object):
         :param train_params: a dictionary of all the parameters used for training, i.e. optimizer,
         starting learning rate, gamma, step_size, weight_decay
         :param loss_function: the loss function used by the network
-        :param cuda_avail: boolean value for availability of cuda
+        :param cuda_avail: boolean value for availability of is_cuda
         :return: None
         """
         self.categories = ['Amphibia', 'Animalia', 'Mammalia', 'Reptilia']
@@ -92,7 +92,7 @@ class ModularNetwork(object):
             self.loss_function = None
         else:
             raise AttributeError('Invalid choice of loss function')
-        self.cuda = cuda_avail
+        self.is_cuda = cuda_avail
 
     def train(self, what, num_epochs):
         """
@@ -112,7 +112,7 @@ class ModularNetwork(object):
         else:
             model = self.feat_model
             model.fc = self.mini_net_model[what]
-        if self.cuda:
+        if self.is_cuda:
             self.feat_model.cuda()
             self.categories_model_fc.cuda()
             for cat in self.categories:
@@ -160,7 +160,7 @@ class ModularNetwork(object):
                 for inputs, (supercategory_targets, species_targets) in self.loaders[phase]:
                     batch_cnt += 1
                     # wrap them in Variable
-                    if self.cuda:
+                    if self.is_cuda:
                         inputs = Variable(inputs.cuda())
                         if what == 'categories_net':
                             labels = Variable(supercategory_targets.cuda())
@@ -227,7 +227,7 @@ class ModularNetwork(object):
         """
         # Build the network
         print('Building the model...')
-        if self.cuda:
+        if self.is_cuda:
             self.feat_model.cuda()
             self.categories_model_fc.cuda()
             for cat in self.categories:
@@ -241,7 +241,7 @@ class ModularNetwork(object):
         correct_species = 0  # Number of correct predictions for the single species
         print('Starting testing...')
         for data, (supercategories_targets, species_targets) in self.loaders['test']:
-            if self.cuda:
+            if self.is_cuda:
                 data, supercategories_targets, species_targets = data.cuda(), supercategories_targets.cuda(), \
                                                                  species_targets.cuda()
             data, supercategories_targets, species_targets = Variable(data, volatile=True), \

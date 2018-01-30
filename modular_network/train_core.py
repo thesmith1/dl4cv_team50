@@ -50,7 +50,7 @@ torch.manual_seed(1)
 if cuda:
     torch.cuda.manual_seed(1)
 print('Starting script...')
-print('Checking cuda...')
+print('Checking is_cuda...')
 print('Cuda is', cuda)
 
 # categories = ['Actinopterygii', 'Amphibia', 'Animalia', 'Arachnida', 'Aves', 'Chromista',

@@ -28,7 +28,7 @@ torch.manual_seed(1)
 if cuda:
     torch.cuda.manual_seed(1)
 print('Starting script...')
-print('Checking cuda...')
+print('Checking is_cuda...')
 print('Cuda is', cuda)
 
 # categories = ['Actinopterygii', 'Amphibia', 'Animalia', 'Arachnida', 'Aves', 'Chromista',
@@ -37,17 +37,17 @@ categories = ['Amphibia', 'Animalia', 'Mammalia', 'Reptilia']
 num_species = {'Actinopterygii': 53, 'Amphibia': 115, 'Animalia': 77, 'Arachnida': 56,
                 'Aves': 964, 'Chromista': 9, 'Fungi': 121, 'Insecta': 1021, 'Mammalia': 186,
                 'Mollusca': 93, 'Plantae': 2101, 'Protozoa': 4, 'Reptilia': 289}
-models = {'categories_net': './modular_network/models/resnet50_supercategories_results_adam_cross_entropy_9_84.pth',
-          'Amphibia': './modular_network/models/resnet50_Amphibia_results_adam_cross_entropy_2_44.pth',
-          'Animalia': './modular_network/models/resnet50_Animalia_results_adam_cross_entropy_1_80.pth',
-          'Mammalia': './modular_network/models/resnet50_Mammalia_results_adam_cross_entropy_1_57.pth',
-          'Reptilia': './modular_network/models/resnet50_Reptilia_results_adam_cross_entropy_2_41.pth'}
+models = {'categories_net': './modular_network/models/resnet50_supercategories_model_adam_cross_entropy_9_84.pth',
+          'Amphibia': './modular_network/models/resnet50_Amphibia_model_adam_cross_entropy_2_44.pth',
+          'Animalia': './modular_network/models/resnet50_Animalia_model_adam_cross_entropy_1_80.pth',
+          'Mammalia': './modular_network/models/resnet50_Mammalia_model_adam_cross_entropy_1_57.pth',
+          'Reptilia': './modular_network/models/resnet50_Reptilia_model_adam_cross_entropy_2_41.pth'}
 
 data_dir = './data_preprocessed/'
 
 batch_size = args.batch_size
 
-annotations_dir = './annotations/modular_network/'
+annotations_dir = './annotations/'
 test_annotations = '{}reduced_dataset_test2017.json'.format(annotations_dir)
 
 transf = transforms.ToTensor()
@@ -58,9 +58,11 @@ print('Dataset loaded.')
 
 test_loader = torch.utils.data.DataLoader(inaturalist_test, batch_size=batch_size, shuffle=True)
 
+train_params = {'optimizer': None, 'learning_rate': None, 'gamma': None, 'step_size': None, 'weight_decay': None}
+
 print('Loading the models to be tested...')
 model = ModularNetwork({'train': None, 'val': None, 'test': inaturalist_test},
-                       {'train': None, 'val': None, 'test': test_loader}, None, None,
+                       {'train': None, 'val': None, 'test': test_loader}, train_params, None,
                        cuda)
 model_core = torch.load(models['categories_net'])
 fc = model_core.categories_model_fc = model_core
