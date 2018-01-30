@@ -65,5 +65,5 @@ Up to now the max validation accuracy for the core network is 84.3% (model 9), w
 
 The training with two fc layers for the branches gave unsatisfactory results (in average 6%); next step: more data augmentation
 
-### 30/01/2018 Paolo
+### 30/01/2018: Paolo
 The single network model using ResNet50 reaches a top-5 validation accuracy of 46%, after ten epochs. However, the validation accuracy flattens out starting from second epoch on. Final results with InceptionNetV3 coming next. In the future a second FC layer and training of convolutional layers may be required.
