@@ -11,16 +11,17 @@ from single_network.train_complete_set import complete_train_validation
 from preprocessing.inaturalist_dataset import INaturalistDataset
 
 # models
-architectures = [models.resnet50, models.inception_v3]
+architectures = [models.resnet50] # [models.inception_v3]
 model_input_sizes = {models.resnet50: 224, models.inception_v3: 299}
 
 # hyper-parameters
-learning_rates = [1e-4, 1e-3, 1e-2]
-regularization_strengths = [0, 1e-4, 1e-3, 1e-2, 1e-1]
-batch_size = 800
-num_epochs = 1
+learning_rates = [1e-3]
+regularization_strengths = [0] # 1e-5
+batch_size = 500
+num_epochs = 10
 optimizer = optim.Adam
 loss = torch.nn.CrossEntropyLoss
+use_second_fc_layer = True
 applied_transformations = transforms.Compose([transforms.ToTensor()])
 
 # set directories
