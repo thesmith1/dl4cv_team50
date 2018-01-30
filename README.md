@@ -67,3 +67,9 @@ The training with two fc layers for the branches gave unsatisfactory results (in
 
 ### 30/01/2018: Paolo
 The single network model using ResNet50 reaches a top-5 validation accuracy of 46%, after ten epochs. However, the validation accuracy flattens out starting from second epoch on. Final results with InceptionNetV3 coming next. In the future a second FC layer and training of convolutional layers may be required.
+
+### 30/01/2018: Giorgio
+Increased the amount of data augmentation, including also random flips. Now the testing script works fine (including the top-5 accuracy).
+A single test run takes more or less 10 minutes. Right now the accuracy in testing for the core network is 67%, while for the branches given
+the core is 21%. Starting trainings with more data augmentation. Will follow another training of core network with 40 epochs, then more focused trainings of the
+branches networks.
