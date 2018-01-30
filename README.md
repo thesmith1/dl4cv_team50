@@ -53,3 +53,11 @@ The core of the modular network has been trained, without data augmentation, her
 Only 4 supercategories over 13 are chosen from now on, in order to speed up the training process. They are Reptilia, Mammalia, Animalia and Amphibia.
 They have been chosen mainly because they together contribute to a reduction of the dataset to 1/7 of its size and because the ratio between their number of images and their number of species is high.
 The generate new annotations files have been included in the annotations folder (they are called reduced_dataset_train2017.json)
+
+### 30/01/2018: Giorgio
+Up to now the max validation accuracy for the core network is 84.3% (model 9), while for the branches I have
+* Amphibia: 44.1% (model 2)
+* Animalia: 80.83% (model 1)
+* Mammalia: 57.7% (model 1)
+* Reptilia: 41.3% (model 2)
+The training with two fc layers for the branches gave unsatisfactory results (in average 6%); next step: more data augmentation
