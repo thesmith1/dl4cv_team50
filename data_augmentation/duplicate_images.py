@@ -17,8 +17,8 @@ dst_annotations = './annotations/augmented_train2017.json'
 # This is the original annotation file for the training images you want to expand
 src_annotations_train = './annotations/reduced_dataset_train2017.json'
 
-threshholds = [20, 40, 60, 80, 100, 200]
-mult_values = [20, 10, 5, 4, 3, 2]
+threshholds = [20, 40, 60, 80, 100, 200, 300]
+mult_values = [40, 20, 10, 5, 4, 3, 2]
 rot_degrees = 30
 contrast_factor = 0.5
 brightness_factor = 0.4
@@ -38,6 +38,8 @@ def augment_image(train_images, img_list, mult_index, category_id, aug_counter):
         image = Image.open(source_root + file_name[0])
 
         data_aug = transforms.Compose([
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomVerticalFlip(),
             transforms.RandomRotation(degrees=rot_degrees),
             transforms.ColorJitter(brightness=brightness_factor, contrast=contrast_factor),
         ])
@@ -45,9 +47,9 @@ def augment_image(train_images, img_list, mult_index, category_id, aug_counter):
         for i in range(mult_values[mult_index]):
             augmented_image = data_aug(image)
             augmented_file_name = (file_name[0].split('.')[0] + str(aug_counter) + '.jpg')
-            #print('\n',augmented_file_name,'\n')
+            # print('\n',augmented_file_name,'\n')
             new_directory = augmented_file_name.rsplit('/', 1)[0]
-            #print(new_directory)
+            # print(new_directory)
             if not os.path.exists(destination_root + new_directory):
                 os.makedirs(destination_root + new_directory)
 
@@ -90,7 +92,6 @@ if __name__ == '__main__':
 #            if ann['category_id'] == species['id']:
 #                imgs_of_species.append(ann['image_id'])
 
-
         # decide which amount of augmentation to do
         did_augmentation = True
         new_ann = None
@@ -107,6 +108,8 @@ if __name__ == '__main__':
             new_ann, new_image_ann, aug_counter = augment_image(train_images, imgs_of_species, 4, species['id'], aug_counter)
         elif len(imgs_of_species) < threshholds[5]:
             new_ann, new_image_ann, aug_counter = augment_image(train_images, imgs_of_species, 5, species['id'], aug_counter)
+        elif len(imgs_of_species) < threshholds[6]:
+            new_ann, new_image_ann, aug_counter = augment_image(train_images, imgs_of_species, 6, species['id'], aug_counter)
         else:
             did_augmentation = False
 

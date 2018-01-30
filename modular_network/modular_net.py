@@ -46,12 +46,12 @@ class ModularNetwork(object):
             param.requires_grad = False
         num_feat = self.feat_model.fc.in_features
         self.hidden_layer_size = int(np.sqrt(num_feat))
-        self.categories_model_fc = nn.Sequential(
-            nn.Linear(num_feat, self.hidden_layer_size),
-            nn.ReLU(),
-            nn.Linear(self.hidden_layer_size, self.num_classes)
-        )
-        # self.categories_model_fc = nn.Linear(num_feat, self.num_classes)
+        # self.categories_model_fc = nn.Sequential(
+        #     nn.Linear(num_feat, self.hidden_layer_size),
+        #     nn.ReLU(),
+        #     nn.Linear(self.hidden_layer_size, self.num_classes)
+        # )
+        self.categories_model_fc = nn.Linear(num_feat, self.num_classes)
         print('Done.')
         # Create the smaller networks, one for each category
         print('Loading the smaller networks for the species...')
