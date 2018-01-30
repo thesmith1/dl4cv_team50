@@ -32,6 +32,7 @@ non_printable = ["model", "optimizer", "loss"]
 cuda = torch.cuda.is_available()
 log_interval = 1
 
+
 def setup_vgg19(parameters, output_categories=667):
 
     # get pre-trained model, change classifier layers
