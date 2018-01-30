@@ -233,7 +233,7 @@ class ModularNetwork(object):
             for cat in self.categories:
                 self.mini_net_model[cat].cuda()
         model = self.feat_model
-        model.fc = self.categories_model_fc
+        # model.fc = self.categories_model_fc
         print('Done.')
 
         model.eval()
@@ -247,17 +247,19 @@ class ModularNetwork(object):
             data, supercategories_targets, species_targets = Variable(data, volatile=True), \
                                                              Variable(supercategories_targets), \
                                                              Variable(species_targets)
+            model.fc = None
             model.fc = self.categories_model_fc
             model.eval()
-            supercategory_outputs = np.argmax(torch.nn.functional.softmax(model(data), dim=0).data, axis=1)
+            _, supercategory_outputs = torch.max(model(data).data, 1)
             for index, output in enumerate(supercategory_outputs):
                 # only if supercategory classification is correct check single species
-                if output == supercategories_targets[index].int:
+                if output == int(supercategories_targets[index].data):
                     correct_core += 1
+                    model.fc = None
                     model.fc = self.mini_net_model[self.categories[output]]
                     model.eval()
                     species_output = model(data)
-                    _, corrects_top5 = model.correct_predictions(species_output, species_targets)
+                    _, corrects_top5 = self.correct_predictions(species_output, species_targets)
                     # pred = species_output.data.max(1, keepdim=True)[1]
                     # correct_species += pred.eq(species_targets.data.view_as(pred)).cpu().sum()
                     correct_species += corrects_top5

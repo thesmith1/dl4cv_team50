@@ -65,12 +65,14 @@ model = ModularNetwork({'train': None, 'val': None, 'test': inaturalist_test},
                        {'train': None, 'val': None, 'test': test_loader}, train_params, None,
                        cuda)
 model_core = torch.load(models['categories_net'])
-fc = model_core.categories_model_fc = model_core
+fc = model_core.categories_model_fc
 model.load_model(fc, 'categories_net')
+model_core = None
 for cat in categories:
     model_species = torch.load(models[cat])
     fc = model_species.mini_net_model[cat]
     model.load_model(fc, cat)
+model_species = None
 print('Models loaded.')
 
 model.test()
