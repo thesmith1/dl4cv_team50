@@ -10,20 +10,31 @@ from torch.autograd import Variable
 # script parameters
 log_interval = 1
 cuda = torch.cuda.is_available()
+intermediate_fc_layer_size = 1000
 
 
-def setup_model(parameters, output_categories=667):
+def setup_model(parameters, output_categories=667, num_fc_layers=1):
     # unwrap parameters
     chosen_model = parameters['model']
     chosen_optimizer = parameters['optimizer']
     lr = parameters['lr']
 
-    # get pre-trained model, change FC layer
+    # get pre-trained model
     model = chosen_model(pretrained=True)
     for param in model.parameters():
         param.requires_grad = False
+
+    # change FC part
     fc_in_features = model.fc.in_features
-    model.fc = nn.Linear(fc_in_features, output_categories)
+    # print("fc_in_features:", fc_in_feautures)
+    if num_fc_layers == 1:
+        model.fc = nn.Linear(fc_in_features, output_categories)
+    elif num_fc_layers > 1:
+        model.fc = nn.Sequential(nn.Linear(fc_in_features, intermediate_fc_layer_size),
+                                 nn.ReLU(),
+                                 nn.Linear(intermediate_fc_layer_size, output_categories))
+    else:
+        raise ValueError("Max nuumber of layer tht can be added for now: 2, got %d" % num_fc_layers)
 
     # move model to GPU
     if cuda:
