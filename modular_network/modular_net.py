@@ -21,24 +21,16 @@ class ModularNetwork(object):
                             'Mollusca': 93, 'Plantae': 2101, 'Protozoa': 4, 'Reptilia': 289}
         self.num_hidden = {'Amphibia': 600, 'Animalia': 500, 'Mammalia': 650, 'Reptilia': 700}
         self.num_classes = len(self.categories)
-        self.datasets = datasets
-        self.loaders = loaders
-        self.optimizer = train_params['optimizer']
-        self.weight_decay = train_params['weight_decay']
-        self.learning_rate = train_params['learning_rate']
-        self.gamma = train_params['gamma']
-        self.step_size = train_params['step_size']
-        if loss_function == 'cross_entropy':
-            self.loss_function = nn.CrossEntropyLoss()
-        elif loss_function == 'l1':
-            self.loss_function = nn.L1Loss()
-        elif loss_function == 'nll':
-            self.loss_function = nn.NLLLoss()
-        elif loss_function == 'l2':
-            self.loss_function = nn.MSELoss()
-        else:
-            raise AttributeError('Invalid choice of loss function')
-        self.cuda = cuda_avail
+        self.datasets = None
+        self.loaders = None
+        self.optimizer = None
+        self.weight_decay = None
+        self.learning_rate = None
+        self.gamma = None
+        self.step_size = None
+        self.loss_function = None
+        self.cuda = False
+        self.set_parameters(datasets, loaders, train_params, loss_function, cuda_avail)
         # The big network which classifies categories
         print('Loading the network for categories...')
         self.feat_model = models.resnet50(pretrained=True)
@@ -66,6 +58,16 @@ class ModularNetwork(object):
         print('Done.')
 
     def set_parameters(self, datasets, loaders, train_params, loss_function, cuda_avail=False):
+        """
+        Set the parameters of the network (cumulative setter)
+        :param datasets: the datasets to be used by the network
+        :param loaders: DataLoader objects which contain the datasets
+        :param train_params: a dictionary of all the parameters used for training, i.e. optimizer,
+        starting learning rate, gamma, step_size, weight_decay
+        :param loss_function: the loss function used by the network
+        :param cuda_avail: boolean value for availability of cuda
+        :return: None
+        """
         self.categories = ['Amphibia', 'Animalia', 'Mammalia', 'Reptilia']
         self.num_species = {'Actinopterygii': 53, 'Amphibia': 115, 'Animalia': 77, 'Arachnida': 56,
                             'Aves': 964, 'Chromista': 9, 'Fungi': 121, 'Insecta': 1021, 'Mammalia': 186,
@@ -86,11 +88,20 @@ class ModularNetwork(object):
             self.loss_function = nn.NLLLoss()
         elif loss_function == 'l2':
             self.loss_function = nn.MSELoss()
+        elif loss_function is None and datasets['test'] is not None:
+            self.loss_function = None
         else:
             raise AttributeError('Invalid choice of loss function')
         self.cuda = cuda_avail
 
     def train(self, what, num_epochs):
+        """
+        This method performs training on a portion of the modular network: it implements top-5 metric in validation time
+        if the trained portion is a branch.
+        :param what: specifies which part of the network is being trained (core of branches)
+        :param num_epochs: the number of epochs for the training process
+        :return: the trained model, the accuracy history and the loss history (the last two are dictionaries)
+        """
         since = time.time()
 
         # Build the network to be trained
@@ -210,6 +221,10 @@ class ModularNetwork(object):
         return model, hist_acc, hist_loss
 
     def test(self):
+        """
+        This method performs training on the whole modular network, implementing top-5 metric for the branches
+        :return: None
+        """
         # Build the network
         print('Building the model...')
         if self.cuda:
@@ -233,15 +248,19 @@ class ModularNetwork(object):
                                                              Variable(supercategories_targets), \
                                                              Variable(species_targets)
             model.fc = self.categories_model_fc
+            model.eval()
             supercategory_outputs = np.argmax(torch.nn.functional.softmax(model(data), dim=0).data, axis=1)
             for index, output in enumerate(supercategory_outputs):
                 # only if supercategory classification is correct check single species
                 if output == supercategories_targets[index].int:
                     correct_core += 1
                     model.fc = self.mini_net_model[self.categories[output]]
+                    model.eval()
                     species_output = model(data)
-                    pred = species_output.data.max(1, keepdim=True)[1]
-                    correct_species += pred.eq(species_targets.data.view_as(pred)).cpu().sum()
+                    _, corrects_top5 = model.correct_predictions(species_output, species_targets)
+                    # pred = species_output.data.max(1, keepdim=True)[1]
+                    # correct_species += pred.eq(species_targets.data.view_as(pred)).cpu().sum()
+                    correct_species += corrects_top5
 
         print('\nTest set: Accuracy on core network: {}/{} ({:.0f}%)\n'.format(correct_core,
                                                                                len(self.loaders['test'].dataset),
@@ -253,25 +272,21 @@ class ModularNetwork(object):
                                                                                   len(self.loaders['test'].dataset)))
 
     def load_model(self, model, what):
+        """
+        Loads a model from the memory and assigns it to a portion of the network.
+        :param model: the object containing the layers of the NN
+        :param what: the portion of the network to which the model will be assigned
+        :return: None
+        """
         if what == 'categories_net':
             self.categories_model_fc = model
         else:
             self.mini_net_model[what] = model
 
-    def __top_five__(self, outputs, labels):
-        corrects = 0
-        probabilities = torch.nn.functional.softmax(outputs, dim=0).data
-        for index, el in enumerate(probabilities):
-            for cnt in range(5):
-                current_pred = np.argmax(el)
-                if current_pred == labels[index]:
-                    corrects += 1
-                else:
-                    probabilities[current_pred] = 0
-        return corrects
-
     def correct_predictions(self, output, target, topk=(1, 5)):
-        """Computes the precision@k for the specified values of k"""
+        """
+        Computes the precision@k for the specified values of k
+        """
         maxk = max(topk)
 
         _, pred = output.topk(maxk, 1, True, True)

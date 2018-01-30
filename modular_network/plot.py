@@ -1,3 +1,7 @@
+"""
+This script plots the history of accuracies and losses provided as inputs
+"""
+
 import argparse
 import pickle
 import matplotlib.pyplot as plt

@@ -60,4 +60,5 @@ Up to now the max validation accuracy for the core network is 84.3% (model 9), w
 * Animalia: 80.83% (model 1)
 * Mammalia: 57.7% (model 1)
 * Reptilia: 41.3% (model 2)
+
 The training with two fc layers for the branches gave unsatisfactory results (in average 6%); next step: more data augmentation

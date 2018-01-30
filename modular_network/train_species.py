@@ -1,6 +1,6 @@
 """
 This script launches the training on all the branches of the modular network,
-the ones which classify the species inside the supercategory;
+the ones which classify the species inside the supercategories;
 at the end of the process, it will save the results and the best models
 """
 
