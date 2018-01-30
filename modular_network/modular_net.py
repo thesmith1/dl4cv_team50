@@ -19,6 +19,7 @@ class ModularNetwork(object):
         self.num_species = {'Actinopterygii': 53, 'Amphibia': 115, 'Animalia': 77, 'Arachnida': 56,
                             'Aves': 964, 'Chromista': 9, 'Fungi': 121, 'Insecta': 1021, 'Mammalia': 186,
                             'Mollusca': 93, 'Plantae': 2101, 'Protozoa': 4, 'Reptilia': 289}
+        self.num_hidden = {'Amphibia': 600, 'Animalia': 500, 'Mammalia': 650, 'Reptilia': 700}
         self.num_classes = len(self.categories)
         self.datasets = datasets
         self.loaders = loaders
@@ -56,7 +57,12 @@ class ModularNetwork(object):
         print('Loading the smaller networks for the species...')
         self.mini_net_model = {}
         for cat in self.categories:
-            self.mini_net_model[cat] = nn.Linear(num_feat, self.num_species[cat])
+            # self.mini_net_model[cat] = nn.Linear(num_feat, self.num_species[cat])
+            self.mini_net_model[cat] = nn.Sequential(
+                nn.Linear(num_feat, self.num_hidden[cat]),
+                nn.ReLU(),
+                nn.Linear(self.num_hidden[cat], self.num_species[cat])
+            )
         print('Done.')
 
     def set_parameters(self, datasets, loaders, train_params, loss_function, cuda_avail=False):
@@ -172,7 +178,7 @@ class ModularNetwork(object):
                     # statistics
                     running_loss += loss.data[0] * inputs.size(0)
                     if what is not 'categories_net' and phase == 'val':
-                        _, corrects_top5 = self.correct_predictions(outputs, labels.data)
+                        _, corrects_top5 = self.correct_predictions(outputs, labels)
                         running_corrects += corrects_top5
                     else:
                         running_corrects += torch.sum(preds == labels.data)
