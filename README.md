@@ -4,10 +4,13 @@
 The structure of the repo is the following (refer to this for the relative paths in your scripts and please DON'T change it):
 * annotations (this folder contains the JSON files for the annotated dataset, i.e. the labels)
 * data (the dataset, the structure of the folders is consistent with the annotations) (of course, this folder is empty...)
-* preprocessing (this folder contains code for preprocessing)
+* preprocessing (this folder contains code for preprocessing and dataset manipulation in pytorch)
 * docs (this folder is for documents of any kind)
 * single_network (this folder contains the code of the single big network)
 * modular_network (this folder contains the code of the modularized network)
+* attention (this folder contains the code of the attention network)
+* data_augmentation (this folder contains the script used to apply data augmentation to the data folder)
+* visualization (this folder contain code for generating images of data visualization and some results)
 
 ## Requirements
 * pycocotools
@@ -25,7 +28,6 @@ python setup.py build_ext install
 Assumed your virtual environment has all the packages listed in the file requirements.txt installed, you may still need some additional installations to make the preprocessing work:
 ```sh
 sudo apt-get install python3-tk
-sudo apt-get install scikit-image
 ```
 
 ## Logs
@@ -60,5 +62,7 @@ Up to now the max validation accuracy for the core network is 84.3% (model 9), w
 * Animalia: 80.83% (model 1)
 * Mammalia: 57.7% (model 1)
 * Reptilia: 41.3% (model 2)
-
 The training with two fc layers for the branches gave unsatisfactory results (in average 6%); next step: more data augmentation
+
+### 30/01/2018 Paolo
+The single network model using ResNet50 reaches a top-5 validation accuracy of 46%, after ten epochs. However, the validation accuracy flattens out starting from second epoch on. Final results with InceptionNetV3 coming next. In the future a second FC layer and training of convolutional layers may be required.
