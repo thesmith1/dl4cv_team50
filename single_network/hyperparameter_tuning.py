@@ -76,6 +76,8 @@ if __name__ == '__main__':
                 parameters['num-epochs'] = num_epochs
                 parameters['optimizer'] = optimizer
                 parameters['loss'] = loss
+                num_fc_layers = 2 if use_second_fc_layer else 1
+                parameters['num-fc-layers'] = num_fc_layers
                 parameters['output-filename'] = "{0}.pth".format(
                     "_".join([str(key) + "=" + (parameter.__name__ if key in non_printable else str(parameter))
                               for key, parameter in parameters.items()]))

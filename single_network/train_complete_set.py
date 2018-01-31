@@ -13,7 +13,6 @@ log_interval = 1
 cuda = torch.cuda.is_available()
 
 
-
 def setup_model(parameters, output_categories=667, num_fc_layers=1):
     # unwrap parameters
     chosen_model = parameters['model']
@@ -170,7 +169,7 @@ def complete_train_validation(parameters, loaders, output_categories, validation
     train_loader, val_loader, test_loader = loaders
     num_epochs = parameters['num-epochs']
     loss = parameters['loss']()
-    model, optimizer = setup_model(parameters, output_categories)
+    model, optimizer = setup_model(parameters, output_categories, parameters['num-fc-layers'])
 
     # training
     print("Starting training (%d epoch%s)" % (num_epochs, "s" if num_epochs != 1 else ""))
