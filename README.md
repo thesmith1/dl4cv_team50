@@ -73,3 +73,10 @@ Increased the amount of data augmentation, including also random flips. Now the 
 A single test run takes more or less 10 minutes. Right now the accuracy in testing for the core network is 67%, while for the branches given
 the core is 21%. Starting trainings with more data augmentation. Will follow another training of core network with 40 epochs, then more focused trainings of the
 branches networks.
+
+### 31/01/2018: Giorgio
+The last training of the core network is not sufficient:
+* Validation accuracy: 83%
+* Epochs: 40
+
+The best model remains (9); now I'll try to make the branches more efficient

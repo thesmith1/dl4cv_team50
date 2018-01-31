@@ -256,7 +256,7 @@ class ModularNetwork(object):
             for index, output in enumerate(supercategory_outputs):
                 cnt += 1
                 percentage = cnt * len(supercategory_outputs) * 100 / len(self.datasets['test'])
-                print('Testing at %.2f' % percentage, end='\r')
+                print('Testing at %.2f' % percentage, '%', end='\r')
                 # only if supercategory classification is correct check single species
                 if output == int(supercategories_targets[index].data):
                     correct_core += 1
