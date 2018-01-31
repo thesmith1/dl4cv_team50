@@ -5,6 +5,7 @@ script for training a model on the complete dataset
 
 import torch.nn as nn
 import torch.utils.data
+from torchvision import models
 from torch.autograd import Variable
 from math import sqrt
 
@@ -13,7 +14,7 @@ log_interval = 1
 cuda = torch.cuda.is_available()
 
 
-def setup_model(parameters, output_categories=667, num_fc_layers=1):
+def setup_model(parameters, output_categories=667, num_fc_layers=1, train_last_conv_layers=False):
     # unwrap parameters
     chosen_model = parameters['model']
     chosen_optimizer = parameters['optimizer']
@@ -21,8 +22,21 @@ def setup_model(parameters, output_categories=667, num_fc_layers=1):
 
     # get pre-trained model
     model = chosen_model(pretrained=True)
+
+    # set gradient requirement
     for param in model.parameters():
         param.requires_grad = False
+    if train_last_conv_layers:
+        if isinstance(model, models.Inception3):
+            params = set.union(set(model.Mixed_7a.parameters()),
+                               set(model.Mixed_7b.parameters()),
+                               set(model.Mixed_7c.parameters()))
+            for param in params:
+                param.required_grad = True
+        if isinstance(model, models.ResNet):
+            params = set.union(set(model.layer3.parameters()), set(model.layer4.parameters()))
+            for param in params:
+                param.required_grad = True
 
     # change FC part
     fc_in_features = model.fc.in_features
@@ -169,7 +183,7 @@ def complete_train_validation(parameters, loaders, output_categories, validation
     train_loader, val_loader, test_loader = loaders
     num_epochs = parameters['num-epochs']
     loss = parameters['loss']()
-    model, optimizer = setup_model(parameters, output_categories, parameters['num-fc-layers'])
+    model, optimizer = setup_model(parameters, output_categories, parameters['num-fc-layers'], parameters['train-conv'])
 
     # training
     print("Starting training (%d epoch%s)" % (num_epochs, "s" if num_epochs != 1 else ""))

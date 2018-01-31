@@ -4,7 +4,7 @@ from torchvision import models, transforms
 import torch
 import torch.optim as optim
 
-lib_path = os.path.abspath(os.path.join(__file__, '../..'))
+lib_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(lib_path)
 # print(sys.path)
 from single_network.train_complete_set import complete_train_validation
@@ -21,6 +21,7 @@ batch_size = 500
 num_epochs = 10
 optimizer = optim.Adam
 loss = torch.nn.CrossEntropyLoss
+train_last_conv_layers = True
 use_second_fc_layer = True
 applied_transformations = transforms.Compose([transforms.ToTensor()])
 
@@ -76,6 +77,7 @@ if __name__ == '__main__':
                 parameters['num-epochs'] = num_epochs
                 parameters['optimizer'] = optimizer
                 parameters['loss'] = loss
+                parameters['train-conv'] = train_last_conv_layers
                 num_fc_layers = 2 if use_second_fc_layer else 1
                 parameters['num-fc-layers'] = num_fc_layers
                 parameters['output-filename'] = "{0}.pth".format(
