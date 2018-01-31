@@ -27,7 +27,8 @@ applied_transformations = transforms.Compose([transforms.ToTensor()])
 def parse_model_parameters(filename):
 
     # accepted parameters
-    accepted_parameters = ['model', 'lr', 'reg', 'batch-size', 'num-epochs', 'optimizer', 'loss']
+    accepted_parameters = ['model', 'lr', 'reg', 'batch-size',
+                           'num-epochs', 'optimizer', 'loss', 'num-fc-layers', 'train-conv']
 
     # split parameters
     parameter_couples = filename[:-4].split("_")
