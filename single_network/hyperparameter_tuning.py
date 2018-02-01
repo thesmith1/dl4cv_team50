@@ -22,7 +22,7 @@ num_epochs = 10
 optimizer = optim.Adam
 loss = torch.nn.CrossEntropyLoss
 train_last_conv_layers = True
-use_second_fc_layer = True
+use_second_fc_layer = False
 applied_transformations = transforms.Compose([transforms.ToTensor()])
 
 # set directories
