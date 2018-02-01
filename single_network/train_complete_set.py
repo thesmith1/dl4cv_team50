@@ -62,6 +62,7 @@ def setup_model(parameters, output_categories=667, num_fc_layers=1, train_last_c
 
     # create optimizer
     trained_params = set.union(set(model.fc.parameters()), additional_trained_params)
+    # print(trained_params)
     optimizer = chosen_optimizer(trained_params, lr=lr, weight_decay=parameters['reg'])
     return model, optimizer
 
