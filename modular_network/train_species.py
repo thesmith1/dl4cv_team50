@@ -78,7 +78,11 @@ for cat in categories:
     train_annotations = '{}augmented_train2017.json'.format(annotations_dir)
     val_annotations = '{}val2017_min.json'.format(annotations_dir)
 
-    transf = transforms.ToTensor()
+    # transf = transforms.ToTensor()
+    transf = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+    ])
 
     print('Loading dataset for supercategories...')
     inaturalist_train = INaturalistDataset(data_dir, train_annotations, transform=transf)
