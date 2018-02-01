@@ -17,7 +17,7 @@ model_input_sizes = {models.resnet50: 224, models.inception_v3: 299}
 # hyper-parameters
 learning_rates = [1e-3]
 regularization_strengths = [0] # 1e-5
-batch_size = 500
+batch_size = 400
 num_epochs = 10
 optimizer = optim.Adam
 loss = torch.nn.CrossEntropyLoss

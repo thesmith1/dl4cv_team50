@@ -32,11 +32,11 @@ def setup_model(parameters, output_categories=667, num_fc_layers=1, train_last_c
                                set(model.Mixed_7b.parameters()),
                                set(model.Mixed_7c.parameters()))
             for param in additional_trained_params:
-                param.required_grad = True
+                param.requires_grad = True
         elif isinstance(model, models.ResNet):
             additional_trained_params = set.union(set(model.layer3.parameters()), set(model.layer4.parameters()))
             for param in additional_trained_params:
-                param.required_grad = True
+                param.requires_grad = True
         else:
             additional_trained_params = {}
             raise ValueError("Invalid model type")
@@ -45,7 +45,7 @@ def setup_model(parameters, output_categories=667, num_fc_layers=1, train_last_c
 
     # change FC part
     fc_in_features = model.fc.in_features
-    # print("fc_in_features:", fc_in_feautures)
+    # print("fc_in_features:", fc_in_features)
     if num_fc_layers == 1:
         model.fc = nn.Linear(fc_in_features, output_categories)
     elif num_fc_layers == 2:
@@ -62,7 +62,7 @@ def setup_model(parameters, output_categories=667, num_fc_layers=1, train_last_c
 
     # create optimizer
     trained_params = set.union(set(model.fc.parameters()), additional_trained_params)
-    # print(trained_params)
+    # print([(type(trained_param.data), trained_param.requires_grad) for trained_param in trained_params])
     optimizer = chosen_optimizer(trained_params, lr=lr, weight_decay=parameters['reg'])
     return model, optimizer
 
