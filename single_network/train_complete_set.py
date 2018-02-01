@@ -54,14 +54,14 @@ def setup_model(parameters, output_categories=667, num_fc_layers=1, train_last_c
                                  nn.ReLU(),
                                  nn.Linear(intermediate_fc_layer_size, output_categories))
     else:
-        raise ValueError("Max nuumber of layer tht can be added for now: 2, got %d" % num_fc_layers)
+        raise ValueError("Max number of layer tht can be added for now: 2, got %d" % num_fc_layers)
 
     # move model to GPU
     if cuda:
         model = model.cuda()
 
     # create optimizer
-    trained_params = set.union(model.fc.parameters(), additional_trained_params)
+    trained_params = set.union(set(model.fc.parameters()), additional_trained_params)
     optimizer = chosen_optimizer(trained_params, lr=lr, weight_decay=parameters['reg'])
     return model, optimizer
 
