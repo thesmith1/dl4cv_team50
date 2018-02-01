@@ -28,15 +28,20 @@ def setup_model(parameters, output_categories=667, num_fc_layers=1, train_last_c
         param.requires_grad = False
     if train_last_conv_layers:
         if isinstance(model, models.Inception3):
-            params = set.union(set(model.Mixed_7a.parameters()),
+            additional_trained_params = set.union(set(model.Mixed_7a.parameters()),
                                set(model.Mixed_7b.parameters()),
                                set(model.Mixed_7c.parameters()))
-            for param in params:
+            for param in additional_trained_params:
                 param.required_grad = True
-        if isinstance(model, models.ResNet):
-            params = set.union(set(model.layer3.parameters()), set(model.layer4.parameters()))
-            for param in params:
+        elif isinstance(model, models.ResNet):
+            additional_trained_params = set.union(set(model.layer3.parameters()), set(model.layer4.parameters()))
+            for param in additional_trained_params:
                 param.required_grad = True
+        else:
+            additional_trained_params = {}
+            raise ValueError("Invalid model type")
+    else:
+        additional_trained_params = {}
 
     # change FC part
     fc_in_features = model.fc.in_features
@@ -56,7 +61,8 @@ def setup_model(parameters, output_categories=667, num_fc_layers=1, train_last_c
         model = model.cuda()
 
     # create optimizer
-    optimizer = chosen_optimizer(model.fc.parameters(), lr=lr, weight_decay=parameters['reg'])
+    trained_params = set.union(model.fc.parameters(), additional_trained_params)
+    optimizer = chosen_optimizer(trained_params, lr=lr, weight_decay=parameters['reg'])
     return model, optimizer
 
 
