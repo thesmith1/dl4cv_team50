@@ -80,3 +80,6 @@ The last training of the core network is not sufficient:
 * Epochs: 40
 
 The best model remains (9); now I'll try to make the branches more efficient
+
+### 01/02/2018: Paolo
+InceptionNetV3 reaches a top-5 validation accuracy of 48%, after ten epochs. Again, the validation accuracy has been flattening out since almost the beginning of the training (epoch 3). The application of a second FC layer didn't produce any significant improvement, but reduced the number of epochs required for reaching the bast performance on the validation set. Results with fine-tuning of the last convolutional layers coming next.
