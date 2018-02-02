@@ -69,8 +69,6 @@ loss_functions = args.loss_functions
 gamma = args.gamma
 weight_decay = args.weight_decay
 step_size = args.step_size
-# optimizers = ['sgd', 'adam', 'rmsprop']
-# loss_functions = ['cross_entropy', 'l1', 'nll', 'l2']
 
 for cat in categories:
     print('Start training of', cat)
@@ -78,11 +76,7 @@ for cat in categories:
     train_annotations = '{}augmented_train2017.json'.format(annotations_dir)
     val_annotations = '{}val2017_min.json'.format(annotations_dir)
 
-    # transf = transforms.ToTensor()
-    transf = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
-    ])
+    transf = transforms.ToTensor()
 
     print('Loading dataset for supercategories...')
     inaturalist_train = INaturalistDataset(data_dir, train_annotations, transform=transf)

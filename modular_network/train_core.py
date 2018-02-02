@@ -64,8 +64,6 @@ data_dir = './data_preprocessed/'
 
 batch_size = args.batch_size
 num_epochs = args.epochs
-# optimizers = ['sgd', 'adam', 'rmsprop']
-# loss_functions = ['cross_entropy', 'l1', 'nll', 'l2']
 start_lr = args.lr
 step_size = args.step_size
 gamma = args.gamma
