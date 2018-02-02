@@ -246,10 +246,10 @@ class ModularNetwork(object):
             model.fc = self.core_net
             model.eval()
             _, supercategory_outputs = torch.max(model(data).data, 1)
+            percentage = cnt * len(supercategory_outputs) * 100 / len(self.datasets['test'])
+            print('Testing at %.2f' % percentage, '%', end='\r')
             for index, output in enumerate(supercategory_outputs):
                 cnt += 1
-                percentage = cnt * len(supercategory_outputs) * 100 / len(self.datasets['test'])
-                print('Testing at %.2f' % percentage, '%', end='\r')
                 # only if supercategory classification is correct check single species
                 if output == int(supercategories_targets[index].data):
                     correct_core += 1
