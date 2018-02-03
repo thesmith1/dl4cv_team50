@@ -38,23 +38,18 @@ class ModularNetwork(object):
             param.requires_grad = False
         num_feat = self.feat_model.fc.in_features
         self.hidden_layer_size = int(np.sqrt(num_feat))
-        # self.categories_model_fc = nn.Sequential(
-        #     nn.Linear(num_feat, self.hidden_layer_size),
-        #     nn.ReLU(),
-        #     nn.Linear(self.hidden_layer_size, self.num_classes)
-        # )
-        self.categories_model_fc = nn.Linear(num_feat, self.num_classes)
+        self.core_net = nn.Sequential(
+            nn.Linear(num_feat, self.hidden_layer_size),
+            nn.ReLU(),
+            nn.Linear(self.hidden_layer_size, self.num_classes)
+        )
+        # self.core_net = nn.Linear(num_feat, self.num_classes)
         print('Done.')
         # Create the smaller networks, one for each category
         print('Loading the smaller networks for the species...')
-        self.mini_net_model = {}
+        self.branch_nets = {}
         for cat in self.categories:
-            # self.mini_net_model[cat] = nn.Linear(num_feat, self.num_species[cat])
-            self.mini_net_model[cat] = nn.Sequential(
-                nn.Linear(num_feat, self.num_hidden[cat]),
-                nn.ReLU(),
-                nn.Linear(self.num_hidden[cat], self.num_species[cat])
-            )
+            self.branch_nets[cat] = nn.Linear(num_feat, self.num_species[cat])
         print('Done.')
 
     def set_parameters(self, datasets, loaders, train_params, loss_function, cuda_avail=False):
@@ -108,15 +103,15 @@ class ModularNetwork(object):
         print('Building the model to be trained...')
         if what == 'categories_net':
             model = self.feat_model
-            model.fc = self.categories_model_fc
+            model.fc = self.core_net
         else:
             model = self.feat_model
-            model.fc = self.mini_net_model[what]
+            model.fc = self.branch_nets[what]
         if self.is_cuda:
             self.feat_model.cuda()
-            self.categories_model_fc.cuda()
+            self.core_net.cuda()
             for cat in self.categories:
-                self.mini_net_model[cat].cuda()
+                self.branch_nets[cat].cuda()
         print('Done.')
 
         if self.optimizer == 'sgd':
@@ -132,7 +127,6 @@ class ModularNetwork(object):
             raise AttributeError('Invalid choice of optimizer')
         scheduler = lr_scheduler.StepLR(optimizer, step_size=self.step_size, gamma=self.gamma)
 
-        # best_models = {what: copy.deepcopy(model.state_dict())}
         best_models = {what: model}
         best_acc = 0.0
 
@@ -144,9 +138,9 @@ class ModularNetwork(object):
         for epoch in range(num_epochs):
             print('Epoch {}/{}'.format(epoch, num_epochs - 1))
             print('-' * 10)
-            batch_cnt = 0
 
             for phase in ['train', 'val']:
+                batch_cnt = 0
                 if phase == 'train':
                     scheduler.step()
                     model.train(True)
@@ -229,11 +223,10 @@ class ModularNetwork(object):
         print('Building the model...')
         if self.is_cuda:
             self.feat_model.cuda()
-            self.categories_model_fc.cuda()
+            self.core_net.cuda()
             for cat in self.categories:
-                self.mini_net_model[cat].cuda()
+                self.branch_nets[cat].cuda()
         model = self.feat_model
-        # model.fc = self.categories_model_fc
         print('Done.')
 
         cnt = 0
@@ -250,23 +243,21 @@ class ModularNetwork(object):
                                                              Variable(supercategories_targets), \
                                                              Variable(species_targets)
             model.fc = None
-            model.fc = self.categories_model_fc
+            model.fc = self.core_net
             model.eval()
             _, supercategory_outputs = torch.max(model(data).data, 1)
+            percentage = cnt * len(supercategory_outputs) * 100 / len(self.datasets['test'])
+            print('Testing at %.2f' % percentage, '%', end='\r')
             for index, output in enumerate(supercategory_outputs):
                 cnt += 1
-                percentage = cnt * len(supercategory_outputs) * 100 / len(self.datasets['test'])
-                print('Testing at %.2f' % percentage, '%', end='\r')
                 # only if supercategory classification is correct check single species
                 if output == int(supercategories_targets[index].data):
                     correct_core += 1
                     model.fc = None
-                    model.fc = self.mini_net_model[self.categories[output]]
+                    model.fc = self.branch_nets[self.categories[output]]
                     model.eval()
                     species_output = model(data)
                     _, corrects_top5 = self.correct_predictions(species_output, species_targets)
-                    # pred = species_output.data.max(1, keepdim=True)[1]
-                    # correct_species += pred.eq(species_targets.data.view_as(pred)).cpu().sum()
                     correct_species += corrects_top5
 
         print('\nTest set: Accuracy on core network: {}/{} ({:.0f}%)\n'.format(correct_core,
@@ -286,9 +277,9 @@ class ModularNetwork(object):
         :return: None
         """
         if what == 'categories_net':
-            self.categories_model_fc = model
+            self.core_net = model
         else:
-            self.mini_net_model[what] = model
+            self.branch_nets[what] = model
 
     def correct_predictions(self, output, target, topk=(1, 5)):
         """

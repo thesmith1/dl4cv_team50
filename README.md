@@ -80,3 +80,20 @@ The last training of the core network is not sufficient:
 * Epochs: 40
 
 The best model remains (9); now I'll try to make the branches more efficient
+
+### 01/02/2018: Paolo
+InceptionNetV3 reaches a top-5 validation accuracy of 48%, after ten epochs. Again, the validation accuracy has been flattening out since almost the beginning of the training (epoch 3). The application of a second FC layer didn't produce any significant improvement, but reduced the number of epochs required for reaching the bast performance on the validation set. Results with fine-tuning of the last convolutional layers coming next.
+
+### 01/02/2018: Giorgio
+Training (9) of branch networks gives slightly better results due to the high number of epochs: 25. General improvement of 1%-2% on each branch network.
+
+### 02/02/2018: Giorgio
+Training with normalization of tensors didn't produce a significant improvement. From now on, trainings stop (10 trainings for the core network; 9 trainings for branches).
+Best validation accuracies are:
+* Core Network: 84,3% (training 9)
+* Amphibia: 47% (training 9)
+* Animalia: 82% (training 9)
+* Mammalia: 62% (training 9)
+* Reptilia: 41% (training 9)
+
+Starting test phase, final results in the next log entry.

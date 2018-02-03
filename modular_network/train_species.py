@@ -69,8 +69,6 @@ loss_functions = args.loss_functions
 gamma = args.gamma
 weight_decay = args.weight_decay
 step_size = args.step_size
-# optimizers = ['sgd', 'adam', 'rmsprop']
-# loss_functions = ['cross_entropy', 'l1', 'nll', 'l2']
 
 for cat in categories:
     print('Start training of', cat)
