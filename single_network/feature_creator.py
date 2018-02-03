@@ -4,9 +4,8 @@ import numpy as np
 from torch.autograd import Variable 
 from torchvision import transforms
 
-base_folder = "/home/paulstpr/dl4cv_team50/"
+base_folder = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(base_folder)
-sys.path.append("/home/paulstpr/dl4cv_team50/")
 
 from preprocessing.inaturalist_dataset import INaturalistDataset
 
