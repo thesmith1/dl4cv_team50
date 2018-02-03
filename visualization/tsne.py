@@ -1,193 +1,241 @@
-#
-#  tsne.py
-#
-# Implementation of t-SNE in Python. The implementation was tested on Python
-# 2.7.10, and it requires a working installation of NumPy. The implementation
-# comes with an example on the MNIST dataset. In order to plot the
-# results of this example, a working installation of matplotlib is required.
-#
-# The example can be run by executing: `ipython tsne.py`
-#
-#
-#  Created by Laurens van der Maaten on 20-12-08.
-#  Copyright (c) 2008 Tilburg University. All rights reserved.
+#!/usr/bin/env python3
+
+import json
 
 import numpy as np
 import pylab
+from sklearn.manifold import TSNE
+import skimage
+from skimage.feature import hog
+from skimage import data, exposure
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+import sys, os
+lib_path = os.path.abspath(os.path.join(__file__, '../..'))
+sys.path.append(lib_path)
+
+lib_path = os.path.abspath(os.path.join(__file__, '../..'))
+sys.path.append(lib_path)
+
+import torch.nn as nn
+import torch.utils.data
+import torch.optim as optim
+from torchvision import models, transforms
+from torch.autograd import Variable
+import copy
+
+## PARAMETERS FOR THE SCRIPT ##
 
 
-def Hbeta(D=np.array([]), beta=1.0):
-    """
-        Compute the perplexity and the P-row for a specific value of the
-        precision of a Gaussian distribution.
-    """
-
-    # Compute P-row and corresponding perplexity
-    P = np.exp(-D.copy() * beta)
-    sumP = sum(P)
-    H = np.log(sumP) + beta * np.sum(D * P) / sumP
-    P = P / sumP
-    return H, P
 
 
-def x2p(X=np.array([]), tol=1e-5, perplexity=30.0):
-    """
-        Performs a binary search to get P-values in such a way that each
-        conditional Gaussian has the same perplexity.
-    """
+#TSNE dims
 
-    # Initialize some variables
-    print("Computing pairwise distances...")
-    (n, d) = X.shape
-    sum_X = np.sum(np.square(X), 1)
-    D = np.add(np.add(-2 * np.dot(X, X.T), sum_X).T, sum_X)
-    P = np.zeros((n, n))
-    beta = np.ones((n, 1))
-    logU = np.log(perplexity)
-
-    # Loop over all datapoints
-    for i in range(n):
-
-        # Print progress
-        if i % 500 == 0:
-            print("Computing P-values for point %d of %d..." % (i, n))
-
-        # Compute the Gaussian kernel and entropy for the current precision
-        betamin = -np.inf
-        betamax = np.inf
-        Di = D[i, np.concatenate((np.r_[0:i], np.r_[i+1:n]))]
-        (H, thisP) = Hbeta(Di, beta[i])
-
-        # Evaluate whether the perplexity is within tolerance
-        Hdiff = H - logU
-        tries = 0
-        while np.abs(Hdiff) > tol and tries < 50:
-
-            # If not, increase or decrease precision
-            if Hdiff > 0:
-                betamin = beta[i].copy()
-                if betamax == np.inf or betamax == -np.inf:
-                    beta[i] = beta[i] * 2.
-                else:
-                    beta[i] = (beta[i] + betamax) / 2.
-            else:
-                betamax = beta[i].copy()
-                if betamin == np.inf or betamin == -np.inf:
-                    beta[i] = beta[i] / 2.
-                else:
-                    beta[i] = (beta[i] + betamin) / 2.
-
-            # Recompute the values
-            (H, thisP) = Hbeta(Di, beta[i])
-            Hdiff = H - logU
-            tries += 1
-
-        # Set the final row of P
-        P[i, np.concatenate((np.r_[0:i], np.r_[i+1:n]))] = thisP
-
-    # Return final P-matrix
-    print("Mean value of sigma: %f" % np.mean(np.sqrt(1 / beta)))
-    return P
+no_dim = 2
 
 
-def pca(X=np.array([]), no_dims=50):
-    """
-        Runs PCA on the NxD array X in order to reduce its dimensionality to
-        no_dims dimensions.
-    """
-
-    print("Preprocessing the data using PCA...")
-    (n, d) = X.shape
-    X = X - np.tile(np.mean(X, 0), (n, 1))
-    (l, M) = np.linalg.eig(np.dot(X.T, X))
-    Y = np.dot(X, M[:, 0:no_dims])
-    return Y
 
 
-def tsne(X=np.array([]), no_dims=2, initial_dims=50, perplexity=30.0):
-    """
-        Runs t-SNE on the dataset in the NxD array X to reduce its
-        dimensionality to no_dims dimensions. The syntaxis of the function is
-        `Y = tsne.tsne(X, no_dims, perplexity), where X is an NxD NumPy array.
-    """
 
-    # Check inputs
-    if isinstance(no_dims, float):
-        print("Error: array X should have type float.")
-        return -1
-    if round(no_dims) != no_dims:
-        print("Error: number of dimensions should be an integer.")
-        return -1
+#Label type for the datapoints
 
-    # Initialize variables
-    X = pca(X, initial_dims).real
-    (n, d) = X.shape
-    max_iter = 1000
-    initial_momentum = 0.5
-    final_momentum = 0.8
-    eta = 500
-    min_gain = 0.01
-    Y = np.random.randn(n, no_dims)
-    dY = np.zeros((n, no_dims))
-    iY = np.zeros((n, no_dims))
-    gains = np.ones((n, no_dims))
+label_tpye = 0 # 1 for species, 0 for supercategory
 
-    # Compute P-values
-    P = x2p(X, 1e-5, perplexity)
-    P = P + np.transpose(P)
-    P = P / np.sum(P)
-    P = P * 4.									# early exaggeration
-    P = np.maximum(P, 1e-12)
 
-    # Run iterations
-    for iter in range(max_iter):
 
-        # Compute pairwise affinities
-        sum_Y = np.sum(np.square(Y), 1)
-        num = -2. * np.dot(Y, Y.T)
-        num = 1. / (1. + np.add(np.add(num, sum_Y).T, sum_Y))
-        num[range(n), range(n)] = 0.
-        Q = num / np.sum(num)
-        Q = np.maximum(Q, 1e-12)
 
-        # Compute gradient
-        PQ = P - Q
-        for i in range(n):
-            dY[i, :] = np.sum(np.tile(PQ[:, i] * num[:, i], (no_dims, 1)).T * (Y[i, :] - Y), 0)
+#Parameter for loading a given NumPy array
 
-        # Perform the update
-        if iter < 20:
-            momentum = initial_momentum
+load_npy = True
+
+
+
+
+#Parameters for creating new annotations and image sets
+
+make_new_annotations = False
+
+annotations_dir = './annotations/'
+name_of_annotation_file = 'vis_annotations.json'
+train_annotations = '{}{}'.format(annotations_dir, name_of_annotation_file)
+
+
+#species_to_be_kept = ['Acinonyx jubatus','Abaeis nicippe']
+species_to_be_kept = [
+'Acinonyx jubatus'
+, 'Lycaon pictus'
+, 'Zalophus californianus'
+,'Acropora palmata'
+]
+supercategory_to_be_kept = None
+supercategories_to_be_kept = None
+
+SPECIFIC_SPECIES = 0
+SPECIFIC_SUPERCATEGORY = 1
+SET_OF_SUPERCATEGORIES = 2
+
+mode = SPECIFIC_SPECIES
+
+# destination paths
+
+dst_annotations_train = './annotations/{}'.format(name_of_annotation_file)
+
+# input path
+
+src_annotations_train = './annotations/train2017.json'
+
+
+def species_of_supecategory(dataset, current_supercategory):
+    filt_species = [category for category in dataset['categories'] if
+                    category['supercategory'] == current_supercategory]
+    return [species['name'] for species in filt_species]
+
+
+
+def get_tsne_figure(train_annotations, species_to_be_kept, supercategory_to_be_kept, supercategories_to_be_kept):
+    if make_new_annotations == True:
+        # load data sets
+        train_set = json.load(open(src_annotations_train))
+        print('loaded files...', end='')
+
+        if mode == SPECIFIC_SUPERCATEGORY:
+            species_to_be_kept = species_of_supecategory(train_set, supercategory_to_be_kept)
+        elif mode == SET_OF_SUPERCATEGORIES:
+            species_to_be_kept = []
+            for supercategory in supercategories_to_be_kept:
+                current_species = species_of_supecategory(train_set, supercategory)
+                for species in current_species:
+                    species_to_be_kept.append(species)
+
+        # obtain all annotations
+        train_annotations = train_set['annotations']
+
+        # transform species to be kept to indexes
+        subset_categories_indexes = [cat['id'] for cat in train_set['categories'] if cat['name'] in species_to_be_kept]
+        print(subset_categories_indexes)
+
+        # obtain image ids for the images the required categories
+        filtered_image_ids_train = [ann['image_id'] for ann in train_annotations if
+                                    ann['category_id'] in subset_categories_indexes]
+    
+        # obtain images on the required categories (i.e. id in filtered image ids)
+        filtered_imgs_train = [img for img in train_set['images'] if img['id'] in filtered_image_ids_train]
+    
+        # keep only annotations of the required categories (i.e. id in filtered image ids)
+        new_ann_train = [ann for ann in train_set['annotations'] if
+                         ann['category_id'] in subset_categories_indexes]
+    
+        # assign new images
+        train_set['images'] = filtered_imgs_train
+        train_set['annotations'] = new_ann_train
+    
+        # assign new categories
+        present_cat_ids_train = {ann['category_id'] for ann in train_set['annotations']}
+        new_cat_train = [cat for cat in train_set['categories'] if cat['id'] in subset_categories_indexes]
+    
+        train_set['categories'] = new_cat_train
+    
+        print(train_set['categories'])
+    
+        # save
+        with open(dst_annotations_train, 'w') as train_file:
+            json.dump(train_set, train_file)
+    
+        print("saved new files.")
+
+
+
+
+        print("Starting preprocessing of the images.")
+
+
+        data_preprocess_dir = './data/'
+        annotations_preprocess_dir = './annotations/'
+        dest_preprocess_dir = './data_preprocessed_{}/'.format(pixel_per_axis)
+
+        train_annotations = '{}{}'.format(annotations_preprocess_dir,name_of_annotation_file)
+
+        preprocessor_train = Preprocessor(data_preprocess_dir, train_annotations, (pixel_per_axis, pixel_per_axis))
+        preprocessor_train.process_images(dest_preprocess_dir)
+
+
+        print("Preprocessing in", dest_preprocess_dir, "completed.")
+
+        print("data dir is: ", data_dir)
+        print("train annotations is: ", train_annotations)
+
+    labels = None
+    stacked = None
+    if load_npy == True:
+        labels = np.load("labels.npy")
+        stacked = np.load("images.npy")
+
+    else:
+
+        print("\n\nLoading visualization set...")
+        inaturalist_train = INaturalistDataset(data_dir, train_annotations, transform=None,
+                                           modular_network_remap=False)
+
+
+        stacked = np.zeros((len(inaturalist_train), number_of_features )) 
+        labels = np.zeros(len(inaturalist_train))
+
+        if number_of_channels == 1:
+            for i, photo_data in enumerate(inaturalist_train):
+    
+                grey = skimage.color.rgb2grey(np.array(photo_data[0]))
+    
+                fd, hog_image = hog(grey, orientations=8, pixels_per_cell=(16, 16),
+                        cells_per_block=(1, 1), visualise=True)
+    
+                hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 10))
+                stacked[i] = np.array(hog_image_rescaled).flatten()
+                labels[i] = photo_data[1][label_tpye]
         else:
-            momentum = final_momentum
-        gains = (gains + 0.2) * ((dY > 0.) != (iY > 0.)) + \
-                (gains * 0.8) * ((dY > 0.) == (iY > 0.))
-        gains[gains < min_gain] = min_gain
-        iY = momentum * iY - eta * (gains * dY)
-        Y = Y + iY
-        Y = Y - np.tile(np.mean(Y, 0), (n, 1))
-
-        # Compute current value of cost function
-        if (iter + 1) % 10 == 0:
-            C = np.sum(P * np.log(P / Q))
-            print("Iteration %d: error is %f" % (iter + 1, C))
-
-        # Stop lying about P-values
-        if iter == 100:
-            P = P / 4.
-
-    # Return solution
-    return Y
+            for i, photo_data in enumerate(inaturalist_train):
+        
+                stacked[i] = np.array(np.array(photo_data[0])).flatten()
+                labels[i] = photo_data[1][label_tpye]
 
 
-if __name__ == "__main__":
-    print("Run Y = tsne.tsne(X, no_dims, perplexity) to perform t-SNE on your dataset.")
-    print("Running example on 2,500 MNIST digits...")
-    X = np.loadtxt("mnist2500_X.txt")
-    labels = np.loadtxt("mnist2500_labels.txt")
-    Y = tsne(X, 2, 50, 20.0)
-    pylab.scatter(Y[:, 0], Y[:, 1], 20, labels)
-    pylab.show()
-    #print(type())
-    #print(object.shape())
+    #Perform TSNE
+
+    X_embedded = TSNE(n_components=no_dim).fit_transform(stacked)
+
+
+
+    #Plot results
+
+    if no_dim == 3:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+    
+        x = X_embedded[:, 0]
+        y = X_embedded[:, 1]
+        z = X_embedded[:, 2]
+        c = labels
+    
+        ax.scatter(x, y, z, c=c, cmap=plt.hot())
+        plt.show()
+    elif no_dim == 2:
+        pylab.scatter(X_embedded[:, 0], X_embedded[:, 1], 20, labels)
+        pylab.show()
+
+
+
+
+
+
+
+if __name__ == '__main__':
+
+    if len(sys.argv) == 3:   #Recieve number of pixels per axis and number of channels as command line arguments
+        pixel_per_axis = int(sys.argv[1])
+        number_of_channels = int(sys.argv[2])
+        number_of_features = (pixel_per_axis**2) * number_of_channels
+        data_dir = './data_preprocessed_{}/'.format(pixel_per_axis)
+        get_tsne_figure(train_annotations, species_to_be_kept, supercategory_to_be_kept,supercategories_to_be_kept)
+    else:    #Recieve given NumPy arrays for the data and the labels
+        get_tsne_figure(train_annotations, species_to_be_kept, supercategory_to_be_kept, supercategories_to_be_kept)
+
 
