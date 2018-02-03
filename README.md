@@ -97,3 +97,6 @@ Best validation accuracies are:
 * Reptilia: 41% (training 9)
 
 Starting test phase, final results in the next log entry.
+
+### 03/02/2017 Paolo
+Training the last convolutional layers produced better results (up to 72% on test set). InceptionNetV3 is still the best performing architecture in this task.
