@@ -1,5 +1,5 @@
 """
-script used to produce a reduced version (some species only) of the complete dataset on JSON
+script used to create new, augmented images to a image set. Run from root directory
 """
 
 import copy
@@ -17,17 +17,13 @@ dst_annotations = './annotations/augmented_train2017.json'
 # This is the original annotation file for the training images you want to expand
 src_annotations_train = './annotations/reduced_dataset_train2017.json'
 
+# thresholds are the image counts below which the number of images are multiplied by the corresponding mult_value
 threshholds = [20, 40, 60, 80, 100, 200, 300]
 mult_values = [40, 20, 10, 5, 4, 3, 2]
+
 rot_degrees = 30
 contrast_factor = 0.5
 brightness_factor = 0.4
-
-
-'''
-inputs
-'''
-
 
 # augment the current set of images
 def augment_image(train_images, img_list, mult_index, category_id, aug_counter):
@@ -47,9 +43,9 @@ def augment_image(train_images, img_list, mult_index, category_id, aug_counter):
         for i in range(mult_values[mult_index]):
             augmented_image = data_aug(image)
             augmented_file_name = (file_name[0].split('.')[0] + str(aug_counter) + '.jpg')
-            # print('\n',augmented_file_name,'\n')
+            
             new_directory = augmented_file_name.rsplit('/', 1)[0]
-            # print(new_directory)
+            
             if not os.path.exists(destination_root + new_directory):
                 os.makedirs(destination_root + new_directory)
 
@@ -86,13 +82,7 @@ if __name__ == '__main__':
         # the list of images of the current species
         imgs_of_species = [ann['image_id'] for ann in train_annotations if ann['category_id'] == species['id']]
         
-#        imgs_of_species = []
-#        for ann in train_annotations:
-#            print('\n','ANN: ',ann,' SPECIES: ', species,'\n')
-#            if ann['category_id'] == species['id']:
-#                imgs_of_species.append(ann['image_id'])
-
-        # decide which amount of augmentation to do
+        # decide what amount of augmentation to do
         did_augmentation = True
         new_ann = None
         new_image_ann = None
