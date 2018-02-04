@@ -1,3 +1,7 @@
+"""
+script to perform a grid search on hyperparameters
+"""
+
 import sys
 import os
 from torchvision import models, transforms
