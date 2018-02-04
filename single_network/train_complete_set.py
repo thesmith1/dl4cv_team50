@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-script for training a model on the complete dataset
+script with functions for training a monolithic model on the dataset
 """
 
 import torch.nn as nn
