@@ -1,3 +1,7 @@
+"""
+script with iNaturalistDataset class, which extends the Dataset class of Pytorch.
+"""
+
 import torch.utils.data as data
 import os
 import os.path
