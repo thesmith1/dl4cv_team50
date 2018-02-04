@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-script for loading a model trained on the iNaturalist dataset back (not just a pre-trained one)
+script for combining trained models.
 """
 import sys
 import os
