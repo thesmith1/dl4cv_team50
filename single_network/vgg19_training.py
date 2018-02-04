@@ -1,3 +1,7 @@
+"""
+script for training a VGG-19 model, necessary for visualization.
+"""
+
 import sys
 import os
 from torchvision import models, transforms
