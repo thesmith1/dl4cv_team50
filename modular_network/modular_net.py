@@ -1,10 +1,8 @@
-import copy
 import time
 
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.optim as optim
 import torchvision.models as models
 from torch.autograd import Variable
@@ -13,14 +11,10 @@ from torch.optim import lr_scheduler
 
 class ModularNetwork(object):
     def __init__(self, datasets, loaders, train_params, loss_function, cuda_avail=False):
-        # self.categories = ['Actinopterygii', 'Amphibia', 'Animalia', 'Arachnida', 'Aves', 'Chromista',
-        #                    'Fungi', 'Insecta', 'Mammalia', 'Mollusca', 'Plantae', 'Protozoa', 'Reptilia']
-        self.categories = ['Amphibia', 'Animalia', 'Mammalia', 'Reptilia']
-        self.num_species = {'Actinopterygii': 53, 'Amphibia': 115, 'Animalia': 77, 'Arachnida': 56,
-                            'Aves': 964, 'Chromista': 9, 'Fungi': 121, 'Insecta': 1021, 'Mammalia': 186,
-                            'Mollusca': 93, 'Plantae': 2101, 'Protozoa': 4, 'Reptilia': 289}
+        self.categories = None
+        self.num_species = None
         self.num_hidden = {'Amphibia': 600, 'Animalia': 500, 'Mammalia': 650, 'Reptilia': 700}
-        self.num_classes = len(self.categories)
+        self.num_classes = None
         self.datasets = None
         self.loaders = None
         self.optimizer = None
@@ -43,7 +37,6 @@ class ModularNetwork(object):
             nn.ReLU(),
             nn.Linear(self.hidden_layer_size, self.num_classes)
         )
-        # self.core_net = nn.Linear(num_feat, self.num_classes)
         print('Done.')
         # Create the smaller networks, one for each category
         print('Loading the smaller networks for the species...')
@@ -150,10 +143,8 @@ class ModularNetwork(object):
                 running_loss = 0.0
                 running_corrects = 0
 
-                # Iterate over data
                 for inputs, (supercategory_targets, species_targets) in self.loaders[phase]:
                     batch_cnt += 1
-                    # wrap them in Variable
                     if self.is_cuda:
                         inputs = Variable(inputs.cuda())
                         if what == 'categories_net':
@@ -167,20 +158,16 @@ class ModularNetwork(object):
                         else:
                             labels = Variable(species_targets)
 
-                    # zero the parameter gradients
                     optimizer.zero_grad()
 
-                    # forward
                     outputs = model(inputs)
                     _, preds = torch.max(outputs.data, 1)
                     loss = self.loss_function(outputs, labels)
 
                     if phase == 'train':
-                        # backward + optimize
                         loss.backward()
                         optimizer.step()
 
-                    # statistics
                     running_loss += loss.data[0] * inputs.size(0)
                     if what is not 'categories_net' and phase == 'val':
                         _, corrects_top5 = self.correct_predictions(outputs, labels)
@@ -200,7 +187,6 @@ class ModularNetwork(object):
                 print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                     phase, epoch_loss, epoch_acc))
 
-                # if best model, save it
                 if phase == 'val' and epoch_acc > best_acc:
                     best_acc = epoch_acc
                     best_models[what] = model
@@ -210,7 +196,6 @@ class ModularNetwork(object):
             time_elapsed // 60, time_elapsed % 60))
         print('Best val Acc: {:4f}'.format(best_acc))
 
-        # load best model weights
         model = best_models[what]
         return model, hist_acc, hist_loss
 

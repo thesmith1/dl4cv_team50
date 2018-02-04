@@ -31,17 +31,15 @@ print('Starting script...')
 print('Checking is_cuda...')
 print('Cuda is', cuda)
 
-# categories = ['Actinopterygii', 'Amphibia', 'Animalia', 'Arachnida', 'Aves', 'Chromista',
-#                'Fungi', 'Insecta', 'Mammalia', 'Mollusca', 'Plantae', 'Protozoa', 'Reptilia']
 categories = ['Amphibia', 'Animalia', 'Mammalia', 'Reptilia']
 num_species = {'Actinopterygii': 53, 'Amphibia': 115, 'Animalia': 77, 'Arachnida': 56,
                 'Aves': 964, 'Chromista': 9, 'Fungi': 121, 'Insecta': 1021, 'Mammalia': 186,
                 'Mollusca': 93, 'Plantae': 2101, 'Protozoa': 4, 'Reptilia': 289}
 models = {'categories_net': './modular_network/models/resnet50_supercategories_model_adam_cross_entropy_9_84.pth',
-          'Amphibia': './modular_network/models/resnet50_Amphibia_model_adam_cross_entropy_2_44.pth',
-          'Animalia': './modular_network/models/resnet50_Animalia_model_adam_cross_entropy_1_80.pth',
-          'Mammalia': './modular_network/models/resnet50_Mammalia_model_adam_cross_entropy_1_57.pth',
-          'Reptilia': './modular_network/models/resnet50_Reptilia_model_adam_cross_entropy_2_41.pth'}
+          'Amphibia': './modular_network/models/resnet50_Amphibia_model_adam_cross_entropy_9_47.pth',
+          'Animalia': './modular_network/models/resnet50_Animalia_model_adam_cross_entropy_9_82.pth',
+          'Mammalia': './modular_network/models/resnet50_Mammalia_model_adam_cross_entropy_9_62.pth',
+          'Reptilia': './modular_network/models/resnet50_Reptilia_model_adam_cross_entropy_9_41.pth'}
 
 data_dir = './data_preprocessed/'
 

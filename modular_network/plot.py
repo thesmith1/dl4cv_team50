@@ -10,6 +10,8 @@ import numpy as np
 parser = argparse.ArgumentParser(description='dl4cv_team50 Modular Network')
 parser.add_argument('--filename', default='', metavar='F',
                     help='the name of the file with the info to be plotted')
+parser.add_argument('--what', default='', metavar='W',
+                    help='the type of plot (loss or acc)')
 args = parser.parse_args()
 
 results = pickle.load(open(args.filename, 'rb'))
@@ -21,9 +23,10 @@ val_acc = results['accuracy']['val']
 
 e = np.arange(0, len(train_loss), 1)
 
-# plt.plot(e, train_loss, 'r--', e, val_loss, 'b--')
-# plt.ylabel('Loss')
-
-plt.plot(e, train_acc, 'r', e, val_acc, 'b')
-plt.ylabel('Accuracy')
+if args.what == 'loss':
+    plt.plot(e, train_loss, 'r--', e, val_loss, 'b--')
+    plt.ylabel('Loss')
+else:
+    plt.plot(e, train_acc, 'r', e, val_acc, 'b')
+    plt.ylabel('Accuracy')
 plt.show()
