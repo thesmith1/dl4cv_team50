@@ -1,5 +1,5 @@
 """
-script used to produce a reduced version (some species only) of the complete dataset on JSON, for debugging purposes
+script used to produce annotation files on JSON, for debugging purposes
 """
 
 import json
