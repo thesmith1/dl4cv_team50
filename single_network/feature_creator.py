@@ -1,3 +1,7 @@
+"""
+script for obtaining the activations required in the visualization part (tsne).
+"""
+
 import sys
 import torch
 import numpy as np
