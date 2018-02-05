@@ -82,7 +82,7 @@ class INaturalistDataset(data.Dataset):
             category_id = self.coco.imgToAnns[img_id][0]['category_id']
             supercategory = self.coco.cats[category_id]['supercategory']
 
-            # obtain remapped [0 to N-1] labels (to avoid pytorch pissing off)
+            # obtain remapped labels, 0 to N-1
             supercategory_target = self.supercat_remapper[supercategory]
             if self.modular_network_remap:
                 category_target = self.category_remappers[supercategory][category_id]
