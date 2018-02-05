@@ -26,33 +26,16 @@ import copy
 
 ## PARAMETERS FOR THE SCRIPT ##
 
-
-
-
 #TSNE dims
-
 no_dim = 2
 
-
-
-
-
 #Label type for the datapoints
-
 label_tpye = 0 # 1 for species, 0 for supercategory
 
-
-
-
 #Parameter for loading a given NumPy array
-
 load_npy = True
 
-
-
-
 #Parameters for creating new annotations and image sets
-
 make_new_annotations = False
 
 annotations_dir = './annotations/'
