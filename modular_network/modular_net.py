@@ -13,7 +13,6 @@ class ModularNetwork(object):
     def __init__(self, datasets, loaders, train_params, loss_function, cuda_avail=False):
         self.categories = None
         self.num_species = None
-        self.num_hidden = {'Amphibia': 600, 'Animalia': 500, 'Mammalia': 650, 'Reptilia': 700}
         self.num_classes = None
         self.datasets = None
         self.loaders = None
