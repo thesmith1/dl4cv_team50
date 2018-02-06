@@ -29,7 +29,7 @@ Assumed your virtual environment has all the packages listed in the file require
 ```sh
 sudo apt-get install python3-tk
 ```
-## How to use:
+## How to use
 * Download and extract the dataset from https://github.com/visipedia/inat_comp#data and put it in a folder called 'data' as child of the root folder
 * Preprocess the data using demo_preprocess.py
 * Run any script using the preprocessed images and the relative annotation files
